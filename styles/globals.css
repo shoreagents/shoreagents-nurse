@@ -1,0 +1,563 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ShoreAgents AI - Light Theme */
+    --background: 0 0% 100%;
+    --foreground: 157 50% 15%;
+    
+    /* Cyber Green Primary */
+    --primary: 162 73% 46%;        /* cyber-green-500 */
+    --primary-foreground: 0 0% 100%;
+    
+    /* Neural Blue Secondary */
+    --secondary: 214 95% 93%;      /* neural-blue-100 */
+    --secondary-foreground: 214 84% 56%;
+    
+    /* Success States */
+    --success: 162 73% 46%;        /* emerald-success-500 */
+    --success-foreground: 0 0% 100%;
+    
+    /* Matrix Orange Destructive */
+    --destructive: 25 95% 53%;     /* matrix-orange-500 */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Muted States */
+    --muted: 162 76% 95%;          /* cyber-green-50 */
+    --muted-foreground: 157 50% 35%;
+    
+    /* Accents */
+    --accent: 162 76% 95%;         /* cyber-green-50 */
+    --accent-foreground: 157 50% 35%;
+    
+    /* Borders */
+    --border: 162 60% 85%;         /* cyber-green-200 */
+    --input: 162 60% 85%;          /* cyber-green-200 */
+    
+    /* Rings */
+    --ring: 162 73% 46%;           /* cyber-green-500 */
+    
+    /* Charts */
+    --chart-1: 162 73% 46%;        /* cyber-green-500 */
+    --chart-2: 214 84% 56%;        /* neural-blue-500 */
+    --chart-3: 25 95% 53%;         /* matrix-orange-500 */
+    --chart-4: 162 100% 30%;       /* emerald-success-600 */
+    --chart-5: 252 83% 57%;        /* purple-500 */
+    
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 157 50% 15%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 157 50% 15%;
+  }
+
+  .dark {
+    /* ShoreAgents AI - Dark Theme */
+    --background: 220 13% 9%;      /* Modern neutral dark */
+    --foreground: 0 0% 100%;       /* Pure white text */
+    
+    /* Cyber Green Primary */
+    --primary: 162 73% 46%;        /* cyber-green-500 */
+    --primary-foreground: 0 0% 100%;
+    
+    /* Neural Blue Secondary */
+    --secondary: 214 32% 20%;      /* neural-blue-800 */
+    --secondary-foreground: 214 95% 93%;
+    
+    /* Success States */
+    --success: 162 73% 46%;        /* emerald-success-500 */
+    --success-foreground: 0 0% 100%;
+    
+    /* Matrix Orange Destructive */
+    --destructive: 25 95% 53%;     /* matrix-orange-500 */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Muted States */
+    --muted: 157 50% 15%;          /* cyber-green-900 */
+    --muted-foreground: 162 40% 65%;
+    
+    /* Accents */
+    --accent: 157 50% 15%;         /* cyber-green-900 */
+    --accent-foreground: 162 76% 95%;
+    
+    /* Borders */
+    --border: 157 50% 25%;         /* cyber-green-800 */
+    --input: 157 50% 25%;          /* cyber-green-800 */
+    
+    /* Rings */
+    --ring: 162 73% 46%;           /* cyber-green-500 */
+    
+    /* Charts */
+    --chart-1: 162 73% 46%;        /* cyber-green-500 */
+    --chart-2: 214 84% 56%;        /* neural-blue-500 */
+    --chart-3: 25 95% 53%;         /* matrix-orange-500 */
+    --chart-4: 162 100% 30%;       /* emerald-success-600 */
+    --chart-5: 252 83% 57%;        /* purple-500 */
+
+    /* Card */
+    --card: 220 13% 11%;
+    --card-foreground: 0 0% 100%;
+
+    /* Popover */
+    --popover: 220 13% 11%;
+    --popover-foreground: 0 0% 100%;
+  }
+}
+
+/* ShoreAgents AI Custom Properties */
+:root {
+  /* Extended Cyber Green Palette */
+  --cyber-green-50: hsl(162, 76%, 95%);
+  --cyber-green-100: hsl(162, 73%, 89%);
+  --cyber-green-200: hsl(162, 60%, 85%);
+  --cyber-green-300: hsl(162, 55%, 75%);
+  --cyber-green-400: hsl(162, 65%, 60%);
+  --cyber-green-500: hsl(162, 73%, 46%);   /* Primary */
+  --cyber-green-600: hsl(162, 100%, 30%);
+  --cyber-green-700: hsl(162, 100%, 24%);
+  --cyber-green-800: hsl(157, 50%, 25%);
+  --cyber-green-900: hsl(157, 50%, 15%);
+  --cyber-green-950: hsl(157, 50%, 6%);
+
+  /* Extended Neural Blue Palette */
+  --neural-blue-50: hsl(214, 100%, 97%);
+  --neural-blue-100: hsl(214, 95%, 93%);
+  --neural-blue-200: hsl(213, 97%, 87%);
+  --neural-blue-300: hsl(212, 96%, 78%);
+  --neural-blue-400: hsl(213, 94%, 68%);
+  --neural-blue-500: hsl(217, 91%, 60%);
+  --neural-blue-600: hsl(221, 83%, 53%);
+  --neural-blue-700: hsl(224, 76%, 48%);
+  --neural-blue-800: hsl(226, 71%, 40%);
+  --neural-blue-900: hsl(224, 64%, 33%);
+  --neural-blue-950: hsl(226, 55%, 21%);
+
+  /* Extended Matrix Orange Palette */
+  --matrix-orange-50: hsl(48, 100%, 96%);
+  --matrix-orange-100: hsl(48, 96%, 89%);
+  --matrix-orange-200: hsl(48, 97%, 77%);
+  --matrix-orange-300: hsl(46, 87%, 65%);
+  --matrix-orange-400: hsl(43, 96%, 56%);
+  --matrix-orange-500: hsl(38, 92%, 50%);
+  --matrix-orange-600: hsl(32, 95%, 44%);
+  --matrix-orange-700: hsl(26, 90%, 37%);
+  --matrix-orange-800: hsl(23, 83%, 31%);
+  --matrix-orange-900: hsl(22, 78%, 26%);
+  --matrix-orange-950: hsl(15, 86%, 14%);
+
+  /* AI Gradients */
+  --gradient-cyber-primary: linear-gradient(135deg, hsl(162, 73%, 46%), hsl(162, 100%, 30%));
+  --gradient-neural-primary: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(252, 83%, 57%));
+  --gradient-matrix-primary: linear-gradient(135deg, hsl(38, 92%, 50%), hsl(32, 95%, 44%));
+  --gradient-ai-hero: linear-gradient(135deg, hsl(162, 73%, 46%), hsl(217, 91%, 60%), hsl(252, 83%, 57%));
+  
+  /* AI Shadows/Glows */
+  --shadow-cyber-glow: 0 0 20px hsla(162, 73%, 46%, 0.3);
+  --shadow-neural-glow: 0 0 20px hsla(217, 91%, 60%, 0.3);
+  --shadow-matrix-glow: 0 0 20px hsla(38, 92%, 50%, 0.3);
+  
+  /* Layout & Container */
+  --container-padding: 2rem;
+  --container-max-width: 1400px;
+}
+
+/* AI Keyframes & Animations */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { 
+    opacity: 0.5;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsla(162, 73%, 46%, 0.4);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 10px hsla(162, 73%, 46%, 0.1);
+  }
+}
+
+@keyframes neural-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes ai-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes matrix-glitch {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+@keyframes ai-breathe {
+  0%, 100% { 
+    opacity: 0.8; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.02);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Container Utility Classes */
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+  
+  @media (min-width: 1536px) {
+    .container {
+      max-width: var(--container-max-width);
+    }
+  }
+}
+
+/* AI Animation Utility Classes */
+@layer utilities {
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out;
+  }
+  
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out;
+  }
+  
+  .animate-cyber-pulse {
+    animation: cyber-pulse 3s ease-in-out infinite;
+  }
+  
+  .animate-neural-shimmer {
+    animation: neural-shimmer 2s infinite;
+  }
+  
+  .animate-ai-float {
+    animation: ai-float 6s ease-in-out infinite;
+  }
+  
+  .animate-matrix-glitch {
+    animation: matrix-glitch 0.5s ease-in-out infinite;
+  }
+  
+  .animate-ai-breathe {
+    animation: ai-breathe 4s ease-in-out infinite;
+  }
+}
+
+/* AI Gradient Utility Classes */
+@layer utilities {
+  .bg-gradient-cyber {
+    background: var(--gradient-cyber-primary);
+  }
+  
+  .bg-gradient-neural {
+    background: var(--gradient-neural-primary);
+  }
+  
+  .bg-gradient-matrix {
+    background: var(--gradient-matrix-primary);
+  }
+  
+  .bg-gradient-ai-hero {
+    background: var(--gradient-ai-hero);
+  }
+}
+
+/* AI Glow Utility Classes */
+@layer utilities {
+  .shadow-cyber-glow {
+    box-shadow: var(--shadow-cyber-glow);
+  }
+  
+  .shadow-neural-glow {
+    box-shadow: var(--shadow-neural-glow);
+  }
+  
+  .shadow-matrix-glow {
+    box-shadow: var(--shadow-matrix-glow);
+  }
+}
+
+/* AI Color Utility Classes */
+@layer utilities {
+  /* Cyber Green Utilities */
+  .text-cyber-green-50 { color: var(--cyber-green-50); }
+  .text-cyber-green-100 { color: var(--cyber-green-100); }
+  .text-cyber-green-200 { color: var(--cyber-green-200); }
+  .text-cyber-green-300 { color: var(--cyber-green-300); }
+  .text-cyber-green-400 { color: var(--cyber-green-400); }
+  .text-cyber-green-500 { color: var(--cyber-green-500); }
+  .text-cyber-green-600 { color: var(--cyber-green-600); }
+  .text-cyber-green-700 { color: var(--cyber-green-700); }
+  .text-cyber-green-800 { color: var(--cyber-green-800); }
+  .text-cyber-green-900 { color: var(--cyber-green-900); }
+  .text-cyber-green-950 { color: var(--cyber-green-950); }
+  
+  .bg-cyber-green-50 { background-color: var(--cyber-green-50); }
+  .bg-cyber-green-100 { background-color: var(--cyber-green-100); }
+  .bg-cyber-green-200 { background-color: var(--cyber-green-200); }
+  .bg-cyber-green-300 { background-color: var(--cyber-green-300); }
+  .bg-cyber-green-400 { background-color: var(--cyber-green-400); }
+  .bg-cyber-green-500 { background-color: var(--cyber-green-500); }
+  .bg-cyber-green-600 { background-color: var(--cyber-green-600); }
+  .bg-cyber-green-700 { background-color: var(--cyber-green-700); }
+  .bg-cyber-green-800 { background-color: var(--cyber-green-800); }
+  .bg-cyber-green-900 { background-color: var(--cyber-green-900); }
+  .bg-cyber-green-950 { background-color: var(--cyber-green-950); }
+  
+  .border-cyber-green-50 { border-color: var(--cyber-green-50); }
+  .border-cyber-green-100 { border-color: var(--cyber-green-100); }
+  .border-cyber-green-200 { border-color: var(--cyber-green-200); }
+  .border-cyber-green-300 { border-color: var(--cyber-green-300); }
+  .border-cyber-green-400 { border-color: var(--cyber-green-400); }
+  .border-cyber-green-500 { border-color: var(--cyber-green-500); }
+  .border-cyber-green-600 { border-color: var(--cyber-green-600); }
+  .border-cyber-green-700 { border-color: var(--cyber-green-700); }
+  .border-cyber-green-800 { border-color: var(--cyber-green-800); }
+  .border-cyber-green-900 { border-color: var(--cyber-green-900); }
+  .border-cyber-green-950 { border-color: var(--cyber-green-950); }
+
+  /* Neural Blue Utilities */
+  .text-neural-blue-50 { color: var(--neural-blue-50); }
+  .text-neural-blue-100 { color: var(--neural-blue-100); }
+  .text-neural-blue-200 { color: var(--neural-blue-200); }
+  .text-neural-blue-300 { color: var(--neural-blue-300); }
+  .text-neural-blue-400 { color: var(--neural-blue-400); }
+  .text-neural-blue-500 { color: var(--neural-blue-500); }
+  .text-neural-blue-600 { color: var(--neural-blue-600); }
+  .text-neural-blue-700 { color: var(--neural-blue-700); }
+  .text-neural-blue-800 { color: var(--neural-blue-800); }
+  .text-neural-blue-900 { color: var(--neural-blue-900); }
+  .text-neural-blue-950 { color: var(--neural-blue-950); }
+  
+  .bg-neural-blue-50 { background-color: var(--neural-blue-50); }
+  .bg-neural-blue-100 { background-color: var(--neural-blue-100); }
+  .bg-neural-blue-200 { background-color: var(--neural-blue-200); }
+  .bg-neural-blue-300 { background-color: var(--neural-blue-300); }
+  .bg-neural-blue-400 { background-color: var(--neural-blue-400); }
+  .bg-neural-blue-500 { background-color: var(--neural-blue-500); }
+  .bg-neural-blue-600 { background-color: var(--neural-blue-600); }
+  .bg-neural-blue-700 { background-color: var(--neural-blue-700); }
+  .bg-neural-blue-800 { background-color: var(--neural-blue-800); }
+  .bg-neural-blue-900 { background-color: var(--neural-blue-900); }
+  .bg-neural-blue-950 { background-color: var(--neural-blue-950); }
+  
+  .border-neural-blue-50 { border-color: var(--neural-blue-50); }
+  .border-neural-blue-100 { border-color: var(--neural-blue-100); }
+  .border-neural-blue-200 { border-color: var(--neural-blue-200); }
+  .border-neural-blue-300 { border-color: var(--neural-blue-300); }
+  .border-neural-blue-400 { border-color: var(--neural-blue-400); }
+  .border-neural-blue-500 { border-color: var(--neural-blue-500); }
+  .border-neural-blue-600 { border-color: var(--neural-blue-600); }
+  .border-neural-blue-700 { border-color: var(--neural-blue-700); }
+  .border-neural-blue-800 { border-color: var(--neural-blue-800); }
+  .border-neural-blue-900 { border-color: var(--neural-blue-900); }
+  .border-neural-blue-950 { border-color: var(--neural-blue-950); }
+
+  /* Matrix Orange Utilities */
+  .text-matrix-orange-50 { color: var(--matrix-orange-50); }
+  .text-matrix-orange-100 { color: var(--matrix-orange-100); }
+  .text-matrix-orange-200 { color: var(--matrix-orange-200); }
+  .text-matrix-orange-300 { color: var(--matrix-orange-300); }
+  .text-matrix-orange-400 { color: var(--matrix-orange-400); }
+  .text-matrix-orange-500 { color: var(--matrix-orange-500); }
+  .text-matrix-orange-600 { color: var(--matrix-orange-600); }
+  .text-matrix-orange-700 { color: var(--matrix-orange-700); }
+  .text-matrix-orange-800 { color: var(--matrix-orange-800); }
+  .text-matrix-orange-900 { color: var(--matrix-orange-900); }
+  .text-matrix-orange-950 { color: var(--matrix-orange-950); }
+  
+  .bg-matrix-orange-50 { background-color: var(--matrix-orange-50); }
+  .bg-matrix-orange-100 { background-color: var(--matrix-orange-100); }
+  .bg-matrix-orange-200 { background-color: var(--matrix-orange-200); }
+  .bg-matrix-orange-300 { background-color: var(--matrix-orange-300); }
+  .bg-matrix-orange-400 { background-color: var(--matrix-orange-400); }
+  .bg-matrix-orange-500 { background-color: var(--matrix-orange-500); }
+  .bg-matrix-orange-600 { background-color: var(--matrix-orange-600); }
+  .bg-matrix-orange-700 { background-color: var(--matrix-orange-700); }
+  .bg-matrix-orange-800 { background-color: var(--matrix-orange-800); }
+  .bg-matrix-orange-900 { background-color: var(--matrix-orange-900); }
+  .bg-matrix-orange-950 { background-color: var(--matrix-orange-950); }
+  
+  .border-matrix-orange-50 { border-color: var(--matrix-orange-50); }
+  .border-matrix-orange-100 { border-color: var(--matrix-orange-100); }
+  .border-matrix-orange-200 { border-color: var(--matrix-orange-200); }
+  .border-matrix-orange-300 { border-color: var(--matrix-orange-300); }
+  .border-matrix-orange-400 { border-color: var(--matrix-orange-400); }
+  .border-matrix-orange-500 { border-color: var(--matrix-orange-500); }
+  .border-matrix-orange-600 { border-color: var(--matrix-orange-600); }
+  .border-matrix-orange-700 { border-color: var(--matrix-orange-700); }
+  .border-matrix-orange-800 { border-color: var(--matrix-orange-800); }
+  .border-matrix-orange-900 { border-color: var(--matrix-orange-900); }
+  .border-matrix-orange-950 { border-color: var(--matrix-orange-950); }
+
+  /* Ring Color Utilities */
+  .ring-cyber-green-500\/20 { --tw-ring-color: hsla(162, 73%, 46%, 0.2); }
+  .ring-neural-blue-500\/20 { --tw-ring-color: hsla(217, 91%, 60%, 0.2); }
+  .ring-matrix-orange-500\/20 { --tw-ring-color: hsla(38, 92%, 50%, 0.2); }
+  
+  .focus\:ring-cyber-green-500\/20:focus { --tw-ring-color: hsla(162, 73%, 46%, 0.2); }
+  .focus\:ring-neural-blue-500\/20:focus { --tw-ring-color: hsla(217, 91%, 60%, 0.2); }
+  .focus\:ring-matrix-orange-500\/20:focus { --tw-ring-color: hsla(38, 92%, 50%, 0.2); }
+}
+
+/* Custom styles for the app */
+.app-container {
+  min-height: 100vh;
+  background: hsl(var(--background));
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+/* AI-Enhanced Component Styles */
+@layer components {
+  .ai-card {
+    @apply bg-card border border-border rounded-lg shadow-sm transition-all duration-300;
+  }
+  
+  .ai-card:hover {
+    @apply shadow-lg -translate-y-1;
+  }
+  
+  .ai-card.cyber {
+    @apply border-cyber-green-200 bg-gradient-to-br from-cyber-green-50 to-white;
+  }
+  
+  .ai-card.cyber:hover {
+    @apply shadow-cyber-glow;
+  }
+  
+  .ai-card.neural {
+    @apply border-neural-blue-200 bg-gradient-to-br from-neural-blue-50 to-white;
+  }
+  
+  .ai-card.neural:hover {
+    @apply shadow-neural-glow;
+  }
+  
+  .ai-card.matrix {
+    @apply border-matrix-orange-200 bg-gradient-to-br from-matrix-orange-50 to-white;
+  }
+  
+  .ai-card.matrix:hover {
+    @apply shadow-matrix-glow;
+  }
+  
+  .ai-button {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .ai-button.cyber {
+    @apply bg-gradient-cyber text-white shadow-lg;
+  }
+  
+  .ai-button.cyber:hover {
+    @apply shadow-cyber-glow;
+  }
+  
+  .ai-button.neural {
+    @apply bg-gradient-neural text-white shadow-lg;
+  }
+  
+  .ai-button.neural:hover {
+    @apply shadow-neural-glow;
+  }
+  
+  .ai-button.matrix {
+    @apply bg-gradient-matrix text-white shadow-lg;
+  }
+  
+  .ai-button.matrix:hover {
+    @apply shadow-matrix-glow;
+  }
+  
+  .ai-input {
+    @apply w-full px-3 py-2 text-sm border rounded-md bg-background transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .ai-input.cyber {
+    @apply border-cyber-green-200 focus:border-cyber-green-500;
+    --tw-ring-color: hsla(162, 73%, 46%, 0.2);
+  }
+  
+  .ai-input.neural {
+    @apply border-neural-blue-200 focus:border-neural-blue-500;
+    --tw-ring-color: hsla(217, 91%, 60%, 0.2);
+  }
+  
+  .ai-input.matrix {
+    @apply border-matrix-orange-200 focus:border-matrix-orange-500;
+    --tw-ring-color: hsla(38, 92%, 50%, 0.2);
+  }
+}
+
+/* Responsive Design Helpers */
+@layer utilities {
+  .container-responsive {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .flex-responsive {
+    @apply flex flex-col sm:flex-row items-center gap-4;
+  }
+} 
