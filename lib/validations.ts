@@ -31,6 +31,22 @@ export const userSchema = z.object({
 })
 
 // Clinic Log validation schemas
+const medicineItemSchema = z.object({
+  name: z.string().min(1, "Medicine name is required"),
+  customName: z.string().optional(),
+  quantity: z.number()
+    .min(0.01, "Quantity must be greater than 0")
+    .max(10000, "Quantity must not exceed 10,000")
+})
+
+const supplyItemSchema = z.object({
+  name: z.string().min(1, "Supply name is required"),
+  customName: z.string().optional(),
+  quantity: z.number()
+    .min(0.01, "Quantity must be greater than 0")
+    .max(10000, "Quantity must not exceed 10,000")
+})
+
 const clinicLogFormBaseSchema = z.object({
   date: dateSchema.refine((date) => date <= new Date(), {
     message: "Date cannot be in the future"
@@ -56,18 +72,19 @@ const clinicLogFormBaseSchema = z.object({
   chiefComplaint: z.string()
     .min(3, "Chief complaint must be at least 3 characters")
     .max(200, "Chief complaint must not exceed 200 characters"),
-  medicineIssued: z.string()
-    .min(2, "Medicine/supplies issued must be at least 2 characters")
-    .max(200, "Medicine/supplies issued must not exceed 200 characters"),
-  quantity: z.number()
-    .min(0.01, "Quantity must be greater than 0")
-    .max(10000, "Quantity must not exceed 10,000"),
+  medicines: z.array(medicineItemSchema).optional().default([]),
+  supplies: z.array(supplyItemSchema).optional().default([]),
   issuedBy: z.string()
     .min(2, "Issued by must be at least 2 characters")
     .max(100, "Issued by must not exceed 100 characters")
 })
 
-export const clinicLogFormSchema = clinicLogFormBaseSchema
+export const clinicLogFormSchema = clinicLogFormBaseSchema.refine((data) => {
+  return data.medicines && data.medicines.length > 0 || data.supplies && data.supplies.length > 0
+}, {
+  message: "At least one medicine or supply must be added",
+  path: ["medicines"]
+})
 
 export const clinicLogSchema = clinicLogFormBaseSchema.extend({
   id: z.string().uuid(),

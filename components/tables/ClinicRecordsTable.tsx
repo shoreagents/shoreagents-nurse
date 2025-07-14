@@ -84,7 +84,7 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
     }
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
       const csvHeaders = [
         'Date',
@@ -93,9 +93,9 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
         'Sex',
         'Employee Number',
         'Client',
-        'Chief Complaint/Illness',
-        'Medicine/Supplies Issued',
-        'Quantity',
+        'Chief Complaint',
+        'Medicines',
+        'Supplies',
         'Issued By',
         'Created At'
       ]
@@ -108,8 +108,8 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
         record.employeeNumber,
         record.client,
         record.chiefComplaint,
-        record.medicineIssued,
-        record.quantity,
+        record.medicines.map(m => `${m.name} (${m.quantity})`).join(', ') || 'None',
+        record.supplies.map(s => `${s.name} (${s.quantity})`).join(', ') || 'None',
         record.issuedBy,
         format(new Date(record.createdAt), 'yyyy-MM-dd HH:mm:ss')
       ])
@@ -212,23 +212,45 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
       )
     },
     {
-      key: 'medicineIssued',
-      header: 'Medicine/Supplies',
-      sortable: true,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 text-muted-foreground" />
-          <Badge variant="secondary">{String(value || '')}</Badge>
+      key: 'medicines',
+      header: 'Medicines',
+      sortable: false,
+      render: (value, record) => (
+        <div className="flex flex-col gap-1">
+          {record.medicines.length > 0 ? (
+            record.medicines.map((medicine, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Package className="w-3 h-3 text-blue-600" />
+                <Badge variant="secondary" className="text-xs">
+                  {medicine.name} ({medicine.quantity})
+                </Badge>
+              </div>
+            ))
+          ) : (
+            <span className="text-xs text-muted-foreground">None</span>
+          )}
         </div>
       )
     },
     {
-      key: 'quantity',
-      header: 'Quantity',
-      sortable: true,
-      align: 'right',
-      render: (value) => (
-        <span className="font-mono font-medium">{String(value || '')}</span>
+      key: 'supplies',
+      header: 'Supplies',
+      sortable: false,
+      render: (value, record) => (
+        <div className="flex flex-col gap-1">
+          {record.supplies.length > 0 ? (
+            record.supplies.map((supply, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Package className="w-3 h-3 text-green-600" />
+                <Badge variant="outline" className="text-xs">
+                  {supply.name} ({supply.quantity})
+                </Badge>
+              </div>
+            ))
+          ) : (
+            <span className="text-xs text-muted-foreground">None</span>
+          )}
+        </div>
       )
     },
     {
@@ -370,14 +392,49 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
                 <label className="text-sm font-medium text-muted-foreground">Chief Complaint/Illness</label>
                 <p className="text-sm mt-1 p-2 bg-muted rounded">{selectedRecord.chiefComplaint}</p>
               </div>
+              
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Medicine/Supplies Issued</label>
-                <p className="text-sm">{selectedRecord.medicineIssued}</p>
+                <label className="text-sm font-medium text-muted-foreground">Medicines Issued</label>
+                <div className="mt-1">
+                  {selectedRecord.medicines.length > 0 ? (
+                    <div className="space-y-1">
+                      {selectedRecord.medicines.map((medicine, index) => (
+                        <div key={index} className="flex items-center gap-2 p-2 bg-blue-50 rounded">
+                          <Package className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm">{medicine.name}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            Qty: {medicine.quantity}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No medicines issued</p>
+                  )}
+                </div>
               </div>
+              
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Quantity</label>
-                <p className="text-sm font-mono">{selectedRecord.quantity}</p>
+                <label className="text-sm font-medium text-muted-foreground">Supplies Issued</label>
+                <div className="mt-1">
+                  {selectedRecord.supplies.length > 0 ? (
+                    <div className="space-y-1">
+                      {selectedRecord.supplies.map((supply, index) => (
+                        <div key={index} className="flex items-center gap-2 p-2 bg-green-50 rounded">
+                          <Package className="w-4 h-4 text-green-600" />
+                          <span className="text-sm">{supply.name}</span>
+                          <Badge variant="outline" className="text-xs">
+                            Qty: {supply.quantity}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No supplies issued</p>
+                  )}
+                </div>
               </div>
+              
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Issued By</label>
                 <p className="text-sm">{selectedRecord.issuedBy}</p>

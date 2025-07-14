@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,11 +14,10 @@ import { useToast } from '@/hooks/use-toast'
 import { clinicLogFormSchema, type ClinicLogFormData } from '@/lib/validations'
 import { useAuth } from '@/hooks/useAuth'
 import { clinicLogStorage, userStorage, activityStorage } from '@/lib/storage'
-import { Calendar, Save, RotateCcw, FileText } from 'lucide-react'
+import { Calendar, Save, RotateCcw, FileText, Plus, Trash2, Pill, Package } from 'lucide-react'
 
-// Common medicines and supplies for dropdown
-const medicineSupplies = [
-  // === MEDICINES ===
+// Medicine items
+const medicines = [
   { value: 'acetylcysteine_600mg', label: 'ACETYLCYSTEINE (600mg/SACHET) - FLUCYSTEINE 600' },
   { value: 'advil', label: 'ADVIL' },
   { value: 'ambroxol_hcl_30mg', label: 'AMBROXOL HCL 30mg - MUCOSOLVAN' },
@@ -49,8 +48,11 @@ const medicineSupplies = [
   { value: 'oral_rehydration_salts', label: 'ORAL REHYDRATION SALTS (APPLE FLAVOR) - HYDRITE' },
   { value: 'salbutamol_nebule', label: 'SALBUTAMOL NEBULE (2.5ml) - HIVENT' },
   { value: 'tranexamic_acid_500mg', label: 'TRANEXAMIC ACID 500mg - HEMOSTAN' },
-  
-  // === SUPPLIES ===
+  { value: 'other_medicine', label: 'Other Medicine (Enter Custom)' }
+]
+
+// Supply items
+const supplies = [
   { value: 'arm_sling', label: 'ARM SLING' },
   { value: 'band_aid_standard', label: 'BAND AID (STANDARD STRIPS-100pcs/BOX) - MEDIPLAST' },
   { value: 'blood_pressure_apparatus', label: 'BLOOD PRESSURE APPARATUS (DESK TYPE) - INDOPLAS' },
@@ -87,37 +89,25 @@ const medicineSupplies = [
   { value: 'tourniquet', label: 'TOURNIQUET' },
   { value: 'triangular_bandage', label: 'TRIANGULAR BANDAGE' },
   { value: 'white_flower_20ml', label: 'WHITE FLOWER 20ml' },
-  
-  // === CUSTOM OPTION ===
-  { value: 'other', label: 'Other (Enter Custom Medicine/Supply)' }
+  { value: 'other_supply', label: 'Other Supply (Enter Custom)' }
 ]
 
-// Common chief complaints
-const chiefComplaints = [
-  { value: 'headache', label: 'Headache' },
-  { value: 'abdominal_pain', label: 'Abdominal Pain' },
-  { value: 'cough', label: 'Cough' },
-  { value: 'colds', label: 'Colds' },
-  { value: 'fever', label: 'Fever' },
-  { value: 'dizziness', label: 'Dizziness' },
-  { value: 'back_pain', label: 'Back Pain' },
-  { value: 'muscle_pain', label: 'Muscle Pain' },
-  { value: 'chest_pain', label: 'Chest Pain' },
-  { value: 'nausea', label: 'Nausea' },
-  { value: 'fatigue', label: 'Fatigue' },
-  { value: 'cut_wound', label: 'Cut/Wound' },
-  { value: 'burn', label: 'Burn' },
-  { value: 'sprain', label: 'Sprain' },
-  { value: 'hypertension', label: 'Hypertension' },
-  { value: 'diabetes', label: 'Diabetes' },
-  { value: 'other', label: 'Other' }
-]
+interface MedicineItem {
+  name: string
+  customName?: string
+  quantity: number
+}
+
+interface SupplyItem {
+  name: string
+  customName?: string
+  quantity: number
+}
 
 export default function ClinicLogForm() {
   const { user } = useAuth()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [customMedicine, setCustomMedicine] = useState('')
 
   // Optimize form initialization - use useMemo to prevent re-computation
   const defaultValues = useMemo(() => ({
@@ -128,8 +118,8 @@ export default function ClinicLogForm() {
     employeeNumber: '',
     client: '',
     chiefComplaint: '',
-    medicineIssued: '',
-    quantity: 1,
+    medicines: [] as MedicineItem[],
+    supplies: [] as SupplyItem[],
     issuedBy: user?.name || ''
   }), [user])
 
@@ -138,10 +128,28 @@ export default function ClinicLogForm() {
     defaultValues
   })
 
-  const { handleSubmit, reset, formState: { errors }, watch } = form
+  const { handleSubmit, reset, formState: { errors }, control } = form
 
-  // Watch for medicine selection changes
-  const selectedMedicine = watch('medicineIssued')
+  // Field arrays for medicines and supplies
+  const { fields: medicineFields, append: appendMedicine, remove: removeMedicine } = useFieldArray({
+    control,
+    name: 'medicines'
+  })
+
+  const { fields: supplyFields, append: appendSupply, remove: removeSupply } = useFieldArray({
+    control,
+    name: 'supplies'
+  })
+
+  // Add new medicine
+  const addMedicine = () => {
+    appendMedicine({ name: '', quantity: 1 })
+  }
+
+  // Add new supply
+  const addSupply = () => {
+    appendSupply({ name: '', quantity: 1 })
+  }
 
   // Optimized save function - direct storage operation
   const saveClinicLog = async (data: ClinicLogFormData) => {
@@ -161,10 +169,14 @@ export default function ClinicLogForm() {
     clinicLogStorage.save(newClinicLog)
     
     // Add activity log
+    const medicinesList = data.medicines.map(m => `${m.name} (${m.quantity})`).join(', ')
+    const suppliesList = data.supplies.map(s => `${s.name} (${s.quantity})`).join(', ')
+    const itemsList = [medicinesList, suppliesList].filter(Boolean).join(', ')
+    
     activityStorage.add({
       type: 'clinic_log',
       title: 'Clinic Log Created',
-      description: `New clinic log for ${data.firstName} ${data.lastName} - ${data.medicineIssued}`,
+      description: `New clinic log for ${data.firstName} ${data.lastName} - ${itemsList || 'No items issued'}`,
       userId: currentUser.id,
       userName: currentUser.name,
       status: 'active'
@@ -183,23 +195,26 @@ export default function ClinicLogForm() {
       return
     }
 
-    // Validate custom medicine if "other" is selected
-    if (data.medicineIssued === 'other') {
-      if (!customMedicine.trim()) {
-        toast({
-          title: 'Error',
-          description: 'Please enter a custom medicine/supply name.',
-          variant: 'destructive'
-        })
-        return
-      }
-      // Replace "other" with the custom medicine name
-      data.medicineIssued = customMedicine.trim()
+    // Process medicines and supplies - handle custom names
+    const processedMedicines = data.medicines.map(medicine => ({
+      ...medicine,
+      name: medicine.name === 'other_medicine' ? (medicine.customName || medicine.name) : medicine.name
+    }))
+
+    const processedSupplies = data.supplies.map(supply => ({
+      ...supply,
+      name: supply.name === 'other_supply' ? (supply.customName || supply.name) : supply.name
+    }))
+
+    const processedData = {
+      ...data,
+      medicines: processedMedicines,
+      supplies: processedSupplies
     }
 
     setIsSubmitting(true)
     try {
-      await saveClinicLog(data)
+      await saveClinicLog(processedData)
       
       toast({
         title: 'Success',
@@ -207,9 +222,8 @@ export default function ClinicLogForm() {
         variant: 'default'
       })
       
-      // Reset form and custom medicine after successful submission
+      // Reset form after successful submission
       reset(defaultValues)
-      setCustomMedicine('')
     } catch (error) {
       console.error('Error saving clinic log:', error)
       toast({
@@ -224,7 +238,6 @@ export default function ClinicLogForm() {
 
   const handleReset = () => {
     reset(defaultValues)
-    setCustomMedicine('')
     toast({
       title: 'Form Reset',
       description: 'All form fields have been cleared.',
@@ -369,86 +382,188 @@ export default function ClinicLogForm() {
                   )}
                 />
 
-                {/* Medicine/Supplies Issued */}
+                {/* Medicines Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Pill className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold">Medicines</h3>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addMedicine}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Medicine
+                    </Button>
+                  </div>
+
+                  {medicineFields.map((field, index) => (
+                    <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-blue-50">
+                      <div className="flex-1">
+                        <FormField
+                          control={control}
+                          name={`medicines.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Medicine *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select medicine" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-[200px] overflow-y-auto">
+                                  {medicines.map((medicine) => (
+                                    <SelectItem key={medicine.value} value={medicine.value}>
+                                      {medicine.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="w-32">
+                        <FormField
+                          control={control}
+                          name={`medicines.${index}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Quantity *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0.01"
+                                  step="0.01"
+                                  placeholder="1"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeMedicine(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Supplies Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-green-600" />
+                      <h3 className="text-lg font-semibold">Supplies</h3>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addSupply}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Supply
+                    </Button>
+                  </div>
+
+                  {supplyFields.map((field, index) => (
+                    <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-green-50">
+                      <div className="flex-1">
+                        <FormField
+                          control={control}
+                          name={`supplies.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Supply *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select supply" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-[200px] overflow-y-auto">
+                                  {supplies.map((supply) => (
+                                    <SelectItem key={supply.value} value={supply.value}>
+                                      {supply.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="w-32">
+                        <FormField
+                          control={control}
+                          name={`supplies.${index}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Quantity *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0.01"
+                                  step="0.01"
+                                  placeholder="1"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeSupply(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Issued By */}
                 <FormField
                   control={form.control}
-                  name="medicineIssued"
+                  name="issuedBy"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Medicine/Supplies Issued *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select medicine/supplies from comprehensive list" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-[200px] overflow-y-auto">
-                          {medicineSupplies.map((medicine) => (
-                            <SelectItem key={medicine.value} value={medicine.value}>
-                              {medicine.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Issued By *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex. Nurse Ron / Thirdy" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {/* Custom Medicine/Supply Input - Shows when "other" is selected */}
-                {selectedMedicine === 'other' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="customMedicine">Custom Medicine/Supply Name *</Label>
-                    <Input
-                      id="customMedicine"
-                      placeholder="Enter custom medicine or supply name"
-                      value={customMedicine}
-                      onChange={(e) => setCustomMedicine(e.target.value)}
-                      className="w-full"
-                    />
-                    {selectedMedicine === 'other' && !customMedicine && (
-                      <p className="text-sm text-red-600">Custom medicine/supply name is required</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Quantity and Issued By */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="quantity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            placeholder="Enter quantity"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="issuedBy"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Issued By *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex. Nurse Ron / Thirdy" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 {/* Form Actions */}
                 <div className="flex justify-end space-x-4 pt-4">

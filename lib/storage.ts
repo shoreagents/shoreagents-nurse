@@ -238,14 +238,20 @@ export const clinicLogStorage = {
     const logs = this.getAll()
     const term = searchTerm.toLowerCase()
     
-    return logs.filter(log => 
-      log.firstName.toLowerCase().includes(term) ||
-      log.lastName.toLowerCase().includes(term) ||
-      log.medicineIssued.toLowerCase().includes(term) ||
-      log.chiefComplaint.toLowerCase().includes(term) ||
-      log.employeeNumber.toLowerCase().includes(term) ||
-      log.client.toLowerCase().includes(term)
-    )
+    return logs.filter(log => {
+      const medicineNames = log.medicines.map(m => m.name.toLowerCase()).join(' ')
+      const supplyNames = log.supplies.map(s => s.name.toLowerCase()).join(' ')
+      
+      return (
+        log.firstName.toLowerCase().includes(term) ||
+        log.lastName.toLowerCase().includes(term) ||
+        medicineNames.includes(term) ||
+        supplyNames.includes(term) ||
+        log.chiefComplaint.toLowerCase().includes(term) ||
+        log.employeeNumber.toLowerCase().includes(term) ||
+        log.client.toLowerCase().includes(term)
+      )
+    })
   }
 }
 
@@ -403,7 +409,11 @@ export const dashboardStorage = {
     const reimbursements = reimbursementStorage.getAll()
     const recentActivity = activityStorage.getRecent(5)
     
-    const totalMedicineValue = clinicLogs.reduce((sum, log) => sum + (log.quantity || 0), 0)
+    const totalMedicineValue = clinicLogs.reduce((sum, log) => {
+      const medicineTotal = log.medicines.reduce((medSum, medicine) => medSum + (medicine.quantity || 0), 0)
+      const supplyTotal = log.supplies.reduce((supSum, supply) => supSum + (supply.quantity || 0), 0)
+      return sum + medicineTotal + supplyTotal
+    }, 0)
     const totalReimbursementAmount = reimbursements.reduce((sum, reimbursement) => sum + reimbursement.amountRequested, 0)
     const pendingReimbursements = reimbursements.filter(r => r.status === 'pending').length
     const approvedReimbursements = reimbursements.filter(r => r.status === 'approved').length

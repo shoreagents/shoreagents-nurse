@@ -25,6 +25,19 @@ export interface LoginCredentials {
   password: string
 }
 
+// Medicine and Supply item types
+export interface MedicineItem {
+  name: string
+  customName?: string
+  quantity: number
+}
+
+export interface SupplyItem {
+  name: string
+  customName?: string
+  quantity: number
+}
+
 // Clinic Log types
 export interface ClinicLog {
   id: string
@@ -35,8 +48,8 @@ export interface ClinicLog {
   employeeNumber: string
   client: string
   chiefComplaint: string
-  medicineIssued: string
-  quantity: number
+  medicines: MedicineItem[]
+  supplies: SupplyItem[]
   issuedBy: string
   nurseId: string
   nurseName: string
@@ -53,8 +66,8 @@ export interface ClinicLogFormData {
   employeeNumber: string
   client: string
   chiefComplaint: string
-  medicineIssued: string
-  quantity: number
+  medicines: MedicineItem[]
+  supplies: SupplyItem[]
   issuedBy: string
 }
 
