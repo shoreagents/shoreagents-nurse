@@ -14,7 +14,7 @@ import { reimbursementFormSchema, type ReimbursementFormData } from '@/lib/valid
 import { useAuth } from '@/hooks/useAuth'
 import { reimbursementStorage, userStorage, activityStorage } from '@/lib/storage'
 import type { Reimbursement } from '@/lib/types'
-import { DollarSign, Save, RotateCcw } from 'lucide-react'
+import { Banknote, Save, RotateCcw } from 'lucide-react'
 
 export default function ReimbursementForm() {
   const { user } = useAuth()
@@ -131,7 +131,7 @@ export default function ReimbursementForm() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+              <Banknote className="h-6 w-6 text-blue-600" />
               Medicine Reimbursement Form
             </CardTitle>
           </CardHeader>
@@ -257,9 +257,9 @@ export default function ReimbursementForm() {
                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
                             <Input
                               type="number"
-                              min="0"
-                              step="0.01"
-                              placeholder="0.00"
+                              min="1"
+                              step="1"
+                              placeholder="1"
                               {...field}
                               onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                               className="pl-8"

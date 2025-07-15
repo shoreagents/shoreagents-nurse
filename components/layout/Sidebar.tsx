@@ -4,9 +4,13 @@ import { useRouter } from 'next/router'
 import { 
   Home, 
   FileText, 
-  DollarSign, 
-  ClipboardList, 
-  Receipt
+  Package,
+  Receipt,
+  Banknote,
+  Plus,
+  Database,
+  Menu,
+  X
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
@@ -24,41 +28,69 @@ interface NavigationItem {
   requiredPermission?: (user: any) => boolean
 }
 
-const navigationItems: NavigationItem[] = [
+interface NavigationSection {
+  id: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  items: NavigationItem[]
+}
+
+const navigationSections: NavigationSection[] = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    href: '/',
+    id: 'platform',
+    label: 'Platform',
     icon: Home,
-    requiredPermission: permissions.canViewDashboard
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        href: '/',
+        icon: Home,
+        requiredPermission: permissions.canViewDashboard
+      }
+    ]
   },
   {
-    id: 'clinic-log-form',
-    label: 'New Clinic Log',
-    href: '/clinic-log-form',
-    icon: FileText,
-    requiredPermission: permissions.canCreateClinicLog
+    id: 'forms',
+    label: 'Forms',
+    icon: Plus,
+    items: [
+      {
+        id: 'clinic-log-form',
+        label: 'New Clinic Log',
+        href: '/clinic-log-form',
+        icon: FileText,
+        requiredPermission: permissions.canCreateClinicLog
+      },
+      {
+        id: 'reimbursement-form',
+        label: 'New Reimbursement',
+        href: '/reimbursement-form',
+        icon: Banknote,
+        requiredPermission: permissions.canCreateReimbursement
+      }
+    ]
   },
   {
-    id: 'clinic-records',
-    label: 'Clinic Records',
-    href: '/clinic-records',
-    icon: ClipboardList,
-    requiredPermission: permissions.canViewClinicLogs
-  },
-  {
-    id: 'reimbursement-form',
-    label: 'New Reimbursement',
-    href: '/reimbursement-form',
-    icon: DollarSign,
-    requiredPermission: permissions.canCreateReimbursement
-  },
-  {
-    id: 'reimbursement-records',
-    label: 'Reimbursement Records',
-    href: '/reimbursement-records',
-    icon: Receipt,
-    requiredPermission: permissions.canViewReimbursements
+    id: 'records',
+    label: 'Records',
+    icon: Database,
+    items: [
+      {
+        id: 'clinic-records',
+        label: 'Clinic Records',
+        href: '/clinic-records',
+        icon: Package,
+        requiredPermission: permissions.canViewClinicLogs
+      },
+      {
+        id: 'reimbursement-records',
+        label: 'Reimbursement Records',
+        href: '/reimbursement-records',
+        icon: Receipt,
+        requiredPermission: permissions.canViewReimbursements
+      }
+    ]
   }
 ]
 
@@ -66,11 +98,14 @@ const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: Side
   const router = useRouter()
   const { user } = useAuth()
 
-  const filteredItems = React.useMemo(() => {
-    return navigationItems.filter(item => {
-      if (!item.requiredPermission) return true
-      return item.requiredPermission(user)
-    })
+  const filteredSections = React.useMemo(() => {
+    return navigationSections.map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        if (!item.requiredPermission) return true
+        return item.requiredPermission(user)
+      })
+    })).filter(section => section.items.length > 0)
   }, [user])
 
   return (
@@ -95,37 +130,44 @@ const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: Side
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 overflow-y-auto">
-        <div className="space-y-1">
-          {!collapsed && (
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
-              Platform
+        <div className="space-y-6">
+          {filteredSections.map((section) => (
+            <div key={section.id}>
+              {!collapsed && (
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <section.icon className="w-3 h-3" />
+                  {section.label}
+                </div>
+              )}
+              
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon
+                  const isActive = router.pathname === item.href
+                  
+                  return (
+                    <Link 
+                      key={item.id} 
+                      href={item.href} 
+                      prefetch={true}
+                      className={cn(
+                        "flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
+                        "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                        collapsed ? "justify-center" : "justify-start",
+                        isActive && "bg-gray-100 text-gray-900 font-semibold"
+                      )}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      <Icon className={cn("h-4 w-4 flex-shrink-0", !collapsed && "mr-3")} />
+                      {!collapsed && (
+                        <span className="truncate">{item.label}</span>
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          )}
-          
-          {filteredItems.map((item) => {
-            const Icon = item.icon
-            const isActive = router.pathname === item.href
-            
-            return (
-              <Link 
-                key={item.id} 
-                href={item.href} 
-                prefetch={true}
-                className={cn(
-                  "flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
-                  "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                  collapsed ? "justify-center" : "justify-start",
-                  isActive && "bg-gray-100 text-gray-900 font-semibold"
-                )}
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon className={cn("h-4 w-4 flex-shrink-0", !collapsed && "mr-3")} />
-                {!collapsed && (
-                  <span className="truncate">{item.label}</span>
-                )}
-              </Link>
-            )
-          })}
+          ))}
         </div>
       </nav>
     </div>

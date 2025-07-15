@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { 
   FileText, 
-  DollarSign, 
+  Banknote, 
   Clock, 
   CheckCircle, 
   AlertCircle,
@@ -96,7 +96,7 @@ const Dashboard = React.memo(function Dashboard() {
     {
       title: 'New Reimbursement',
       description: 'Submit reimbursement request',
-      icon: DollarSign,
+      icon: Banknote,
       href: '/reimbursement-form',
       color: 'bg-green-500'
     },
@@ -176,7 +176,7 @@ const Dashboard = React.memo(function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Reimbursements</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{extendedStats.totalReimbursements}</div>
@@ -194,7 +194,7 @@ const Dashboard = React.memo(function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{extendedStats.pendingReimbursements}</div>
             <p className="text-xs text-muted-foreground">
-              ${extendedStats.pendingReimbursementAmount.toFixed(2)} pending
+              ₱{extendedStats.pendingReimbursementAmount.toFixed(2)} pending
             </p>
           </CardContent>
         </Card>
@@ -206,7 +206,7 @@ const Dashboard = React.memo(function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${extendedStats.totalMedicineValue.toFixed(2)}
+              ₱{extendedStats.totalMedicineValue.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               Total inventory value
@@ -225,7 +225,7 @@ const Dashboard = React.memo(function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{extendedStats.approvedReimbursements}</div>
             <p className="text-xs text-muted-foreground">
-              ${extendedStats.approvedReimbursementAmount.toFixed(2)} approved
+              ₱{extendedStats.approvedReimbursementAmount.toFixed(2)} approved
             </p>
           </CardContent>
         </Card>
@@ -250,7 +250,7 @@ const Dashboard = React.memo(function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${extendedStats.averageReimbursementAmount.toFixed(2)}
+              ₱{extendedStats.averageReimbursementAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               Per reimbursement
@@ -265,7 +265,7 @@ const Dashboard = React.memo(function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              ${extendedStats.totalReimbursementAmount.toFixed(2)}
+              ₱{extendedStats.totalReimbursementAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               All time total

@@ -96,7 +96,7 @@ export function useSettings() {
     notifications: true,
     language: 'en',
     dateFormat: 'MM/dd/yyyy',
-    currency: 'USD',
+    currency: 'PHP',
     itemsPerPage: 10
   })
 
@@ -114,7 +114,7 @@ export function useSettings() {
       notifications: true,
       language: 'en',
       dateFormat: 'MM/dd/yyyy',
-      currency: 'USD',
+      currency: 'PHP',
       itemsPerPage: 10
     })
   }

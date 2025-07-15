@@ -107,6 +107,7 @@ export const reimbursementFormSchema = z.object({
   receiptDate: z.string().min(1, 'Receipt date is required'),
   amountRequested: z.number().min(0.01, 'Amount must be greater than 0'),
   email: z.string().email('Invalid email address').min(1, 'Email is required'),
+  status: z.enum(['pending', 'approved', 'rejected']).default('pending'),
 })
 
 export const reimbursementSchema = reimbursementFormSchema.extend({
@@ -156,7 +157,7 @@ export const appSettingsSchema = z.object({
   autoSave: z.boolean().default(true),
   itemsPerPage: z.number().min(5).max(100).default(10),
   dateFormat: z.string().default('MM/dd/yyyy'),
-  currency: z.string().min(1, "Currency is required").default('USD')
+  currency: z.string().min(1, "Currency is required").default('PHP')
 })
 
 // Dashboard schemas

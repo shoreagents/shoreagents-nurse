@@ -87,6 +87,18 @@ export function DataTable<T extends Record<string, any>>({
       if (value) {
         filtered = filtered.filter(item => {
           const itemValue = item[key]
+          
+          // Special handling for medicines and supplies arrays
+          if (key === 'medicines' || key === 'supplies') {
+            if (Array.isArray(itemValue)) {
+              return itemValue.some(medicine => 
+                medicine.name?.toLowerCase() === value.toLowerCase()
+              )
+            }
+            return false
+          }
+          
+          // Default string comparison for other fields
           return itemValue?.toString().toLowerCase() === value.toLowerCase()
         })
       }
@@ -249,7 +261,7 @@ export function DataTable<T extends Record<string, any>>({
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -272,6 +284,7 @@ export function DataTable<T extends Record<string, any>>({
                   ))}
                 </TableRow>
               </TableHeader>
+              
               <TableBody>
                 {loading ? (
                   <TableRow>

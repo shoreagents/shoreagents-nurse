@@ -92,6 +92,17 @@ const supplies = [
   { value: 'other_supply', label: 'Other Supply (Enter Custom)' }
 ]
 
+// Utility functions to get display names
+const getMedicineDisplayName = (name: string): string => {
+  const medicine = medicines.find(m => m.value === name)
+  return medicine ? medicine.label : name
+}
+
+const getSupplyDisplayName = (name: string): string => {
+  const supply = supplies.find(s => s.value === name)
+  return supply ? supply.label : name
+}
+
 interface MedicineItem {
   name: string
   customName?: string
@@ -169,8 +180,8 @@ export default function ClinicLogForm() {
     clinicLogStorage.save(newClinicLog)
     
     // Add activity log
-    const medicinesList = data.medicines.map(m => `${m.name} (${m.quantity})`).join(', ')
-    const suppliesList = data.supplies.map(s => `${s.name} (${s.quantity})`).join(', ')
+    const medicinesList = data.medicines.map(m => `${getMedicineDisplayName(m.name)} (${m.quantity})`).join(', ')
+    const suppliesList = data.supplies.map(s => `${getSupplyDisplayName(s.name)} (${s.quantity})`).join(', ')
     const itemsList = [medicinesList, suppliesList].filter(Boolean).join(', ')
     
     activityStorage.add({
@@ -440,8 +451,8 @@ export default function ClinicLogForm() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  min="0.01"
-                                  step="0.01"
+                                  min="1"
+                                  step="1"
                                   placeholder="1"
                                   {...field}
                                   onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
@@ -524,8 +535,8 @@ export default function ClinicLogForm() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  min="0.01"
-                                  step="0.01"
+                                  min="1"
+                                  step="1"
                                   placeholder="1"
                                   {...field}
                                   onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}

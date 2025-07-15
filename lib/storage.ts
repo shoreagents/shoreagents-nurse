@@ -109,7 +109,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoSave: true,
   itemsPerPage: 10,
   dateFormat: 'MM/dd/yyyy',
-  currency: 'USD'
+  currency: 'PHP'
 }
 
 // User management

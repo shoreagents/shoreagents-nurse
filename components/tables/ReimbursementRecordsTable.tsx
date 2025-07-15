@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Reimbursement } from '@/lib/types'
 import { reimbursementStorage, userStorage, activityStorage } from '@/lib/storage'
 import { reimbursementFormSchema, type ReimbursementFormData } from '@/lib/validations'
-import { Eye, Edit, Trash2, Calendar, User, MapPin, Receipt, CheckCircle, XCircle, Clock, Mail, DollarSign, Save, X } from 'lucide-react'
+import { Eye, Edit, Trash2, Calendar, User, MapPin, Receipt, CheckCircle, XCircle, Clock, Mail, Banknote, Save, X } from 'lucide-react'
 
 interface ReimbursementRecordsTableProps {
   className?: string
@@ -41,7 +41,8 @@ const ReimbursementRecordsTable = React.memo(function ReimbursementRecordsTable(
       workLocation: 'Office',
       receiptDate: '',
       amountRequested: 0,
-      email: ''
+      email: '',
+      status: 'pending'
     }
   })
 
@@ -305,7 +306,8 @@ const ReimbursementRecordsTable = React.memo(function ReimbursementRecordsTable(
       workLocation: record.workLocation,
       receiptDate: record.receiptDate,
       amountRequested: record.amountRequested,
-      email: record.email
+      email: record.email,
+      status: record.status
     })
     setEditDialogOpen(true)
   }
@@ -428,7 +430,7 @@ const ReimbursementRecordsTable = React.memo(function ReimbursementRecordsTable(
       align: 'right',
       render: (value) => (
         <div className="flex items-center gap-2 justify-end">
-          <DollarSign className="w-4 h-4 text-muted-foreground" />
+          <Banknote className="w-4 h-4 text-muted-foreground" />
           <span className="font-mono font-medium">
             ₱{(value as number).toFixed(2)}
           </span>
@@ -777,6 +779,30 @@ const ReimbursementRecordsTable = React.memo(function ReimbursementRecordsTable(
                     )}
                   />
                 </div>
+
+                {/* Status */}
+                <FormField
+                  control={editForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Form Actions */}
                 <div className="flex justify-end space-x-4 pt-4">
