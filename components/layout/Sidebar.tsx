@@ -10,7 +10,8 @@ import {
   Plus,
   Database,
   Menu,
-  X
+  X,
+  Warehouse
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
@@ -68,6 +69,20 @@ const navigationSections: NavigationSection[] = [
         href: '/reimbursement-form',
         icon: Banknote,
         requiredPermission: permissions.canCreateReimbursement
+      }
+    ]
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    icon: Warehouse,
+    items: [
+      {
+        id: 'inventory-management',
+        label: 'Inventory Management',
+        href: '/inventory',
+        icon: Package,
+        requiredPermission: permissions.canViewInventory
       }
     ]
   },

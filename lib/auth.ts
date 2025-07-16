@@ -139,5 +139,30 @@ export const permissions = {
   canViewSettings: (user: User | null): boolean => {
     if (!user) return false
     return true // All authenticated users can view settings
+  },
+
+  canViewInventory: (user: User | null): boolean => {
+    if (!user) return false
+    return user.role === 'nurse' || user.role === 'admin'
+  },
+
+  canManageInventory: (user: User | null): boolean => {
+    if (!user) return false
+    return user.role === 'nurse' || user.role === 'admin'
+  },
+
+  canAddInventoryItems: (user: User | null): boolean => {
+    if (!user) return false
+    return user.role === 'nurse' || user.role === 'admin'
+  },
+
+  canEditInventoryItems: (user: User | null): boolean => {
+    if (!user) return false
+    return user.role === 'nurse' || user.role === 'admin'
+  },
+
+  canDeleteInventoryItems: (user: User | null): boolean => {
+    if (!user) return false
+    return user.role === 'admin'
   }
 } 

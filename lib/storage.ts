@@ -5,7 +5,10 @@ import {
   AppSettings, 
   StorageData,
   DashboardStats,
-  ActivityItem 
+  ActivityItem,
+  InventoryMedicine,
+  InventorySupply,
+  InventoryTransaction
 } from './types'
 
 // Storage keys
@@ -17,7 +20,10 @@ const STORAGE_KEYS = {
   SETTINGS: 'shoreagents_nurse_settings',
   FORM_DRAFTS: 'shoreagents_nurse_form_drafts',
   ACTIVITY_LOG: 'shoreagents_nurse_activity_log',
-  LAST_BACKUP: 'shoreagents_nurse_last_backup'
+  LAST_BACKUP: 'shoreagents_nurse_last_backup',
+  INVENTORY_MEDICINES: 'shoreagents_nurse_inventory_medicines',
+  INVENTORY_SUPPLIES: 'shoreagents_nurse_inventory_supplies',
+  INVENTORY_TRANSACTIONS: 'shoreagents_nurse_inventory_transactions'
 } as const
 
 // Helper function to safely parse JSON
@@ -476,76 +482,355 @@ export const backupStorage = {
   }
 }
 
-// Initialize default data if not exists
-export function initializeStorage(): void {
-  console.log('Initializing storage...')
+// Inventory Medicine Storage
+export const inventoryMedicineStorage = {
+  getAll(): InventoryMedicine[] {
+    const medicinesJson = localStorage.getItem(STORAGE_KEYS.INVENTORY_MEDICINES)
+    const medicines = safeJsonParse<InventoryMedicine[]>(medicinesJson, [])
+    
+    return medicines.map(medicine => ({
+      ...medicine,
+      createdAt: new Date(medicine.createdAt),
+      updatedAt: new Date(medicine.updatedAt),
+      expiryDate: medicine.expiryDate ? new Date(medicine.expiryDate) : undefined
+    }))
+  },
+
+  save(medicine: InventoryMedicine): void {
+    const medicines = this.getAll()
+    const existingIndex = medicines.findIndex(m => m.id === medicine.id)
+    
+    if (existingIndex >= 0) {
+      medicines[existingIndex] = { ...medicine, updatedAt: new Date() }
+    } else {
+      medicines.push({ ...medicine, id: generateUUID(), createdAt: new Date(), updatedAt: new Date() })
+    }
+    
+    localStorage.setItem(STORAGE_KEYS.INVENTORY_MEDICINES, safeJsonStringify(medicines))
+  },
+
+  getById(id: string): InventoryMedicine | null {
+    const medicines = this.getAll()
+    return medicines.find(m => m.id === id) || null
+  },
+
+  getByName(name: string): InventoryMedicine | null {
+    const medicines = this.getAll()
+    return medicines.find(m => m.name === name) || null
+  },
+
+  getActive(): InventoryMedicine[] {
+    return this.getAll().filter(m => m.isActive)
+  },
+
+  updateStock(id: string, quantity: number, reason: string, userId: string, userName: string): void {
+    const medicines = this.getAll()
+    const medicineIndex = medicines.findIndex(m => m.id === id)
+    
+    if (medicineIndex >= 0) {
+      const medicine = medicines[medicineIndex]
+      const previousStock = medicine.stock
+      medicine.stock = Math.max(0, medicine.stock + quantity)
+      medicine.updatedAt = new Date()
+      medicines[medicineIndex] = medicine
+      
+      localStorage.setItem(STORAGE_KEYS.INVENTORY_MEDICINES, safeJsonStringify(medicines))
+      
+      // Record transaction
+      inventoryTransactionStorage.add({
+        type: quantity > 0 ? 'stock_in' : 'stock_out',
+        itemType: 'medicine',
+        itemId: id,
+        itemName: medicine.displayName,
+        quantity: Math.abs(quantity),
+        previousStock,
+        newStock: medicine.stock,
+        reason,
+        userId,
+        userName
+      })
+    }
+  },
+
+  delete(id: string): void {
+    const medicines = this.getAll().filter(m => m.id !== id)
+    localStorage.setItem(STORAGE_KEYS.INVENTORY_MEDICINES, safeJsonStringify(medicines))
+  },
+
+  search(searchTerm: string): InventoryMedicine[] {
+    const medicines = this.getAll()
+    const term = searchTerm.toLowerCase()
+    
+    return medicines.filter(m => 
+      m.name.toLowerCase().includes(term) ||
+      m.displayName.toLowerCase().includes(term) ||
+      m.category.toLowerCase().includes(term) ||
+      (m.description && m.description.toLowerCase().includes(term))
+    )
+  }
+}
+
+// Inventory Supply Storage
+export const inventorySupplyStorage = {
+  getAll(): InventorySupply[] {
+    const suppliesJson = localStorage.getItem(STORAGE_KEYS.INVENTORY_SUPPLIES)
+    const supplies = safeJsonParse<InventorySupply[]>(suppliesJson, [])
+    
+    return supplies.map(supply => ({
+      ...supply,
+      createdAt: new Date(supply.createdAt),
+      updatedAt: new Date(supply.updatedAt),
+      expiryDate: supply.expiryDate ? new Date(supply.expiryDate) : undefined
+    }))
+  },
+
+  save(supply: InventorySupply): void {
+    const supplies = this.getAll()
+    const existingIndex = supplies.findIndex(s => s.id === supply.id)
+    
+    if (existingIndex >= 0) {
+      supplies[existingIndex] = { ...supply, updatedAt: new Date() }
+    } else {
+      supplies.push({ ...supply, id: generateUUID(), createdAt: new Date(), updatedAt: new Date() })
+    }
+    
+    localStorage.setItem(STORAGE_KEYS.INVENTORY_SUPPLIES, safeJsonStringify(supplies))
+  },
+
+  getById(id: string): InventorySupply | null {
+    const supplies = this.getAll()
+    return supplies.find(s => s.id === id) || null
+  },
+
+  getByName(name: string): InventorySupply | null {
+    const supplies = this.getAll()
+    return supplies.find(s => s.name === name) || null
+  },
+
+  getActive(): InventorySupply[] {
+    return this.getAll().filter(s => s.isActive)
+  },
+
+  updateStock(id: string, quantity: number, reason: string, userId: string, userName: string): void {
+    const supplies = this.getAll()
+    const supplyIndex = supplies.findIndex(s => s.id === id)
+    
+    if (supplyIndex >= 0) {
+      const supply = supplies[supplyIndex]
+      const previousStock = supply.stock
+      supply.stock = Math.max(0, supply.stock + quantity)
+      supply.updatedAt = new Date()
+      supplies[supplyIndex] = supply
+      
+      localStorage.setItem(STORAGE_KEYS.INVENTORY_SUPPLIES, safeJsonStringify(supplies))
+      
+      // Record transaction
+      inventoryTransactionStorage.add({
+        type: quantity > 0 ? 'stock_in' : 'stock_out',
+        itemType: 'supply',
+        itemId: id,
+        itemName: supply.displayName,
+        quantity: Math.abs(quantity),
+        previousStock,
+        newStock: supply.stock,
+        reason,
+        userId,
+        userName
+      })
+    }
+  },
+
+  delete(id: string): void {
+    const supplies = this.getAll().filter(s => s.id !== id)
+    localStorage.setItem(STORAGE_KEYS.INVENTORY_SUPPLIES, safeJsonStringify(supplies))
+  },
+
+  search(searchTerm: string): InventorySupply[] {
+    const supplies = this.getAll()
+    const term = searchTerm.toLowerCase()
+    
+    return supplies.filter(s => 
+      s.name.toLowerCase().includes(term) ||
+      s.displayName.toLowerCase().includes(term) ||
+      s.category.toLowerCase().includes(term) ||
+      (s.description && s.description.toLowerCase().includes(term))
+    )
+  }
+}
+
+// Inventory Transaction Storage
+export const inventoryTransactionStorage = {
+  getAll(): InventoryTransaction[] {
+    const transactionsJson = localStorage.getItem(STORAGE_KEYS.INVENTORY_TRANSACTIONS)
+    const transactions = safeJsonParse<InventoryTransaction[]>(transactionsJson, [])
+    
+    return transactions.map(transaction => ({
+      ...transaction,
+      createdAt: new Date(transaction.createdAt)
+    }))
+  },
+
+  add(transaction: Omit<InventoryTransaction, 'id' | 'createdAt'>): void {
+    const transactions = this.getAll()
+    const newTransaction = {
+      ...transaction,
+      id: generateUUID(),
+      createdAt: new Date()
+    }
+    
+    transactions.push(newTransaction)
+    localStorage.setItem(STORAGE_KEYS.INVENTORY_TRANSACTIONS, safeJsonStringify(transactions))
+  },
+
+  getByItemId(itemId: string): InventoryTransaction[] {
+    return this.getAll().filter(t => t.itemId === itemId)
+  },
+
+  getByType(type: InventoryTransaction['type']): InventoryTransaction[] {
+    return this.getAll().filter(t => t.type === type)
+  },
+
+  getRecent(limit: number = 10): InventoryTransaction[] {
+    const transactions = this.getAll()
+    return transactions
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
+  }
+} 
+
+// Initialize default inventory data
+export const initializeInventory = () => {
+  const medicines = inventoryMedicineStorage.getAll()
+  const supplies = inventorySupplyStorage.getAll()
   
+  // If inventory is empty, populate with default data
+  if (medicines.length === 0) {
+    const defaultMedicines = [
+      { name: 'acetylcysteine_600mg', displayName: 'ACETYLCYSTEINE (600mg/SACHET) - FLUCYSTEINE 600', category: 'Respiratory', unit: 'sachets', stock: 100, reorderLevel: 20 },
+      { name: 'advil', displayName: 'ADVIL', category: 'Analgesics', unit: 'tablets', stock: 200, reorderLevel: 50 },
+      { name: 'ambroxol_hcl_30mg', displayName: 'AMBROXOL HCL 30mg - MUCOSOLVAN', category: 'Respiratory', unit: 'tablets', stock: 150, reorderLevel: 30 },
+      { name: 'amlodipine_10mg', displayName: 'AMLODIPINE 10mg - RITEMED', category: 'Cardiovascular', unit: 'tablets', stock: 180, reorderLevel: 40 },
+      { name: 'bactidol_lozenges', displayName: 'BACTIDOL LOZENGES', category: 'Respiratory', unit: 'pieces', stock: 120, reorderLevel: 25 },
+      { name: 'betahistine_16mg', displayName: 'BETAHISTINE 16mg - SERC', category: 'Other', unit: 'tablets', stock: 90, reorderLevel: 15 },
+      { name: 'bioflu', displayName: 'BIOFLU', category: 'Respiratory', unit: 'capsules', stock: 140, reorderLevel: 30 },
+      { name: 'biogesic', displayName: 'BIOGESIC', category: 'Analgesics', unit: 'tablets', stock: 250, reorderLevel: 60 },
+      { name: 'buscopan_10mg', displayName: 'BUSCOPAN 10mg', category: 'Antispasmodics', unit: 'tablets', stock: 80, reorderLevel: 20 },
+      { name: 'butamirate_citrate_50mg', displayName: 'BUTAMIRATE CITRATE 50mg - SINECOD FORTE', category: 'Respiratory', unit: 'tablets', stock: 70, reorderLevel: 15 },
+      { name: 'catapres_75mcg', displayName: 'CATAPRES 75mcg', category: 'Cardiovascular', unit: 'tablets', stock: 60, reorderLevel: 10 },
+      { name: 'celecoxib_200mg', displayName: 'CELECOXIB 200mg - RITEMED', category: 'Analgesics', unit: 'capsules', stock: 110, reorderLevel: 25 },
+      { name: 'cetirizine_10mg', displayName: 'CETIRIZINE 10mg - VIRLIX', category: 'Antihistamines', unit: 'tablets', stock: 200, reorderLevel: 50 },
+      { name: 'cinnarizine_75mg', displayName: 'CINNARIZINE 75mg', category: 'Other', unit: 'tablets', stock: 85, reorderLevel: 20 },
+      { name: 'difflam', displayName: 'DIFFLAM', category: 'Topical', unit: 'ml', stock: 50, reorderLevel: 10 },
+      { name: 'domperidone_10mg', displayName: 'DOMPERIDONE 10mg - RITEMED', category: 'Digestive', unit: 'tablets', stock: 130, reorderLevel: 30 },
+      { name: 'gaviscon', displayName: 'GAVISCON (24 SACHETS/BOX)', category: 'Digestive', unit: 'boxes', stock: 40, reorderLevel: 8 },
+      { name: 'hidrasec', displayName: 'HIDRASEC', category: 'Digestive', unit: 'capsules', stock: 90, reorderLevel: 20 },
+      { name: 'kremil_s_advance', displayName: 'KREMIL-S ADVANCE', category: 'Digestive', unit: 'tablets', stock: 160, reorderLevel: 35 },
+      { name: 'loperamide_2mg', displayName: 'LOPERAMIDE 2mg - DIATABS', category: 'Digestive', unit: 'tablets', stock: 140, reorderLevel: 30 },
+      { name: 'loratadine_10mg', displayName: 'LORATADINE 10mg - ALLERTA', category: 'Antihistamines', unit: 'tablets', stock: 180, reorderLevel: 40 },
+      { name: 'losartan_potassium_50mg', displayName: 'LOSARTAN POTASSIUM 50mg - RITEMED', category: 'Cardiovascular', unit: 'tablets', stock: 170, reorderLevel: 35 },
+      { name: 'mefenamic_acid_500mg', displayName: 'MEFENAMIC ACID 500mg - DOLFENAL', category: 'Analgesics', unit: 'tablets', stock: 190, reorderLevel: 45 },
+      { name: 'metoclopramide_10mg', displayName: 'METOCLOPRAMIDE 10mg - PLASIL', category: 'Digestive', unit: 'tablets', stock: 120, reorderLevel: 25 },
+      { name: 'naproxen_sodium', displayName: 'NAPROXEN SODIUM - FLANAX', category: 'Analgesics', unit: 'tablets', stock: 100, reorderLevel: 25 },
+      { name: 'neozep_z_non_drowsy', displayName: 'NEOZEP Z+ NON-DROWSY', category: 'Respiratory', unit: 'tablets', stock: 150, reorderLevel: 35 },
+      { name: 'omeprazole_40mg', displayName: 'OMEPRAZOLE 40mg - RITEMED', category: 'Digestive', unit: 'capsules', stock: 130, reorderLevel: 30 },
+      { name: 'oral_rehydration_salts', displayName: 'ORAL REHYDRATION SALTS (APPLE FLAVOR) - HYDRITE', category: 'Digestive', unit: 'sachets', stock: 80, reorderLevel: 20 },
+      { name: 'salbutamol_nebule', displayName: 'SALBUTAMOL NEBULE (2.5ml) - HIVENT', category: 'Bronchodilators', unit: 'vials', stock: 60, reorderLevel: 15 },
+      { name: 'tranexamic_acid_500mg', displayName: 'TRANEXAMIC ACID 500mg - HEMOSTAN', category: 'Other', unit: 'tablets', stock: 90, reorderLevel: 20 }
+    ]
+    
+    defaultMedicines.forEach(medicine => {
+      inventoryMedicineStorage.save({
+        id: '',
+        name: medicine.name,
+        displayName: medicine.displayName,
+        category: medicine.category,
+        unit: medicine.unit,
+        stock: medicine.stock,
+        reorderLevel: medicine.reorderLevel,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+    })
+  }
+  
+  if (supplies.length === 0) {
+    const defaultSupplies = [
+      { name: 'arm_sling', displayName: 'ARM SLING', category: 'Emergency', unit: 'pieces', stock: 25, reorderLevel: 5 },
+      { name: 'band_aid_standard', displayName: 'BAND AID (STANDARD STRIPS-100pcs/BOX) - MEDIPLAST', category: 'Bandages', unit: 'boxes', stock: 30, reorderLevel: 8 },
+      { name: 'blood_pressure_apparatus', displayName: 'BLOOD PRESSURE APPARATUS (DESK TYPE) - INDOPLAS', category: 'Diagnostic', unit: 'units', stock: 3, reorderLevel: 1 },
+      { name: 'blood_pressure_cuff_large', displayName: 'BLOOD PRESSURE CUFF (LARGE)', category: 'Diagnostic', unit: 'pieces', stock: 10, reorderLevel: 2 },
+      { name: 'burn_ointment_15g', displayName: 'BURN OINTMENT 15g - UNITED HOME', category: 'Topical', unit: 'tubes', stock: 40, reorderLevel: 10 },
+      { name: 'calamine_lotion_30ml', displayName: 'CALAMINE LOTION 30ml - CALADRYL', category: 'Topical', unit: 'bottles', stock: 35, reorderLevel: 8 },
+      { name: 'calmoseptine_ointment', displayName: 'CALMOSEPTINE OINTMENT 3.5g', category: 'Topical', unit: 'tubes', stock: 45, reorderLevel: 12 },
+      { name: 'cotton_balls', displayName: 'COTTON BALLS', category: 'Consumables', unit: 'packs', stock: 80, reorderLevel: 20 },
+      { name: 'cotton_buds', displayName: 'COTTON BUDS', category: 'Consumables', unit: 'packs', stock: 60, reorderLevel: 15 },
+      { name: 'digital_thermometer', displayName: 'DIGITAL THERMOMETER', category: 'Diagnostic', unit: 'pieces', stock: 15, reorderLevel: 3 },
+      { name: 'disposable_vinyl_gloves_medium', displayName: 'DISPOSABLE VINYL GLOVES (MEDIUM, 100PCS/BOX) - SURE-GUARD', category: 'Protective Equipment', unit: 'boxes', stock: 50, reorderLevel: 12 },
+      { name: 'efficascent_oil_100ml', displayName: 'EFFICASCENT OIL 100ml', category: 'Topical', unit: 'bottles', stock: 25, reorderLevel: 6 },
+      { name: 'elastic_bandage_2inch', displayName: 'ELASTIC BANDAGE 2"', category: 'Bandages', unit: 'rolls', stock: 40, reorderLevel: 10 },
+      { name: 'elastic_bandage_4inch', displayName: 'ELASTIC BANDAGE 4"', category: 'Bandages', unit: 'rolls', stock: 35, reorderLevel: 8 },
+      { name: 'face_mask_50pcs', displayName: 'FACE MASK 50PCS/BOX - RX DR. CARE', category: 'Protective Equipment', unit: 'boxes', stock: 100, reorderLevel: 25 },
+      { name: 'hot_bag_electric', displayName: 'HOT BAG (ELECTRIC)', category: 'Instruments', unit: 'pieces', stock: 8, reorderLevel: 2 },
+      { name: 'hydrogen_peroxide_120ml', displayName: 'HYDROGEN PEROXIDE 120ml - AGUAPER', category: 'Cleaning', unit: 'bottles', stock: 45, reorderLevel: 12 },
+      { name: 'ice_bag_size_9', displayName: 'ICE BAG (SIZE 9) - INMED', category: 'Instruments', unit: 'pieces', stock: 20, reorderLevel: 5 },
+      { name: 'infrared_thermometer', displayName: 'INFRARED THERMOMETER', category: 'Diagnostic', unit: 'pieces', stock: 10, reorderLevel: 2 },
+      { name: 'micropore_tape', displayName: 'MICROPORE TAPE', category: 'Bandages', unit: 'rolls', stock: 50, reorderLevel: 12 },
+      { name: 'mupirocin_ointment_15g', displayName: 'MUPIROCIN OINTMENT (15g/TUBE)', category: 'Topical', unit: 'tubes', stock: 30, reorderLevel: 8 },
+      { name: 'nebulizer_kit', displayName: 'NEBULIZER KIT', category: 'Instruments', unit: 'kits', stock: 15, reorderLevel: 3 },
+      { name: 'omega_pain_killer_120ml', displayName: 'OMEGA PAIN KILLER 120ml', category: 'Topical', unit: 'bottles', stock: 35, reorderLevel: 8 },
+      { name: 'oxygen_mask', displayName: 'OXYGEN MASK', category: 'Emergency', unit: 'pieces', stock: 40, reorderLevel: 10 },
+      { name: 'oxygen_nasal_cannula', displayName: 'OXYGEN NASAL CANNULA', category: 'Emergency', unit: 'pieces', stock: 30, reorderLevel: 8 },
+      { name: 'paper_cups', displayName: 'PAPER CUPS', category: 'Consumables', unit: 'packs', stock: 25, reorderLevel: 6 },
+      { name: 'povidine_iodine_120ml', displayName: 'POVIDINE IODINE 120ml - BETADINE', category: 'Cleaning', unit: 'bottles', stock: 40, reorderLevel: 10 },
+      { name: 'salonpas_20_patches', displayName: 'SALONPAS (20 PATCHES)', category: 'Topical', unit: 'boxes', stock: 30, reorderLevel: 8 },
+      { name: 'silver_sulfadiazine_cream_20g', displayName: 'SILVER SULFADIAZINE CREAM 20g - MAZINE', category: 'Topical', unit: 'tubes', stock: 25, reorderLevel: 6 },
+      { name: 'sterile_gauze_4x4', displayName: 'STERILE GAUZE 4x4 - RX DR. CARE', category: 'Bandages', unit: 'packs', stock: 60, reorderLevel: 15 },
+      { name: 'sterile_tongue_depressor_6inch', displayName: 'STERILE TONGUE DEPRESSOR 6" - RX DR. CARE', category: 'Diagnostic', unit: 'packs', stock: 40, reorderLevel: 10 },
+      { name: 'tears_naturale_ii', displayName: 'TEARS NATURALE II - ALCON', category: 'Topical', unit: 'bottles', stock: 20, reorderLevel: 5 },
+      { name: 'tobramycin_eye_drops_5ml', displayName: 'TOBRAMYCIN EYE DROPS 5ml - TOBREX', category: 'Topical', unit: 'bottles', stock: 25, reorderLevel: 6 },
+      { name: 'tourniquet', displayName: 'TOURNIQUET', category: 'Emergency', unit: 'pieces', stock: 15, reorderLevel: 3 },
+      { name: 'triangular_bandage', displayName: 'TRIANGULAR BANDAGE', category: 'Bandages', unit: 'pieces', stock: 35, reorderLevel: 8 },
+      { name: 'white_flower_20ml', displayName: 'WHITE FLOWER 20ml', category: 'Topical', unit: 'bottles', stock: 30, reorderLevel: 8 }
+    ]
+    
+    defaultSupplies.forEach(supply => {
+      inventorySupplyStorage.save({
+        id: '',
+        name: supply.name,
+        displayName: supply.displayName,
+        category: supply.category,
+        unit: supply.unit,
+        stock: supply.stock,
+        reorderLevel: supply.reorderLevel,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+    })
+  }
+}
+
+// Initialize storage with default data
+export const initializeStorage = () => {
+  // Check if localStorage is available
   if (!isLocalStorageAvailable()) {
-    console.error('localStorage is not available during initialization')
+    console.error('localStorage is not available')
     return
   }
-  
-  // Initialize users if not exists
-  if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-    console.log('Initializing default users')
+
+  // Initialize users if not present
+  const users = userStorage.getAllUsers()
+  if (users.length === 0) {
     userStorage.saveUsers(DEFAULT_USERS)
-  } else {
-    console.log('Users already exist in localStorage')
   }
 
-  // Initialize settings if not exists
-  if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-    console.log('Initializing default settings')
+  // Initialize settings if not present
+  const settings = settingsStorage.get()
+  if (!settings || Object.keys(settings).length === 0) {
     settingsStorage.save(DEFAULT_SETTINGS)
   }
 
-  // Initialize empty arrays for other data if not exists
-  if (!localStorage.getItem(STORAGE_KEYS.CLINIC_LOGS)) {
-    console.log('Initializing empty clinic logs')
-    localStorage.setItem(STORAGE_KEYS.CLINIC_LOGS, '[]')
-  }
-
-  if (!localStorage.getItem(STORAGE_KEYS.REIMBURSEMENTS)) {
-    console.log('Initializing empty reimbursements')
-    localStorage.setItem(STORAGE_KEYS.REIMBURSEMENTS, '[]')
-  }
-  
-  if (!localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOG)) {
-    console.log('Initializing empty activity log')
-    localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOG, '[]')
-  }
-  
-  console.log('Storage initialization complete')
-}
-
-// Storage utilities
-export const storageUtils = {
-  getStorageSize(): number {
-    let total = 0
-    for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        total += localStorage[key].length
-      }
-    }
-    return total
-  },
-
-  formatStorageSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  },
-
-  isStorageAvailable(): boolean {
-    try {
-      const test = '__storage_test__'
-      localStorage.setItem(test, test)
-      localStorage.removeItem(test)
-      return true
-    } catch (e) {
-      return false
-    }
-  }
+  // Initialize inventory
+  initializeInventory()
 } 

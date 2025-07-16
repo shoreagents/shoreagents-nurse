@@ -25,7 +25,8 @@ export default function App({ Component, pageProps }: AppProps) {
         '/clinic-log-form',
         '/clinic-records',
         '/reimbursement-form',
-        '/reimbursement-records'
+        '/reimbursement-records',
+        '/inventory'
       ]
 
       // Prefetch immediately

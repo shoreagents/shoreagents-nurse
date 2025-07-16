@@ -58,7 +58,8 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
       '/clinic-log-form',
       '/clinic-records',
       '/reimbursement-form',
-      '/reimbursement-records'
+      '/reimbursement-records',
+      '/inventory'
     ]
 
     // Preload immediately and again after a short delay
@@ -113,6 +114,12 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
       altKey: true,
       action: () => navigateToRoute('/reimbursement-records'),
       description: 'View Reimbursement Records'
+    },
+    {
+      key: 'i',
+      altKey: true,
+      action: () => navigateToRoute('/inventory'),
+      description: 'Inventory Management'
     },
     ...(onToggleSidebar ? [{
       key: 's',

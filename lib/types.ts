@@ -38,6 +38,57 @@ export interface SupplyItem {
   quantity: number
 }
 
+// Inventory management types
+export interface InventoryMedicine {
+  id: string
+  name: string
+  displayName: string
+  description?: string
+  category: string
+  stock: number
+  unit: string
+  reorderLevel: number
+  price?: number
+  expiryDate?: Date
+  supplier?: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface InventorySupply {
+  id: string
+  name: string
+  displayName: string
+  description?: string
+  category: string
+  stock: number
+  unit: string
+  reorderLevel: number
+  price?: number
+  expiryDate?: Date
+  supplier?: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface InventoryTransaction {
+  id: string
+  type: 'stock_in' | 'stock_out' | 'adjustment'
+  itemType: 'medicine' | 'supply'
+  itemId: string
+  itemName: string
+  quantity: number
+  previousStock: number
+  newStock: number
+  reason: string
+  reference?: string
+  userId: string
+  userName: string
+  createdAt: Date
+}
+
 // Clinic Log types
 export interface ClinicLog {
   id: string
