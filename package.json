@@ -9,19 +9,11 @@
     "dev:electron": "wait-on tcp:3000 && electron .",
     "build": "next build",
     "build:electron": "npm run build && electron-builder",
-    "build:portable": "npm run build && electron-packager . ShoreAgents-Nurse-App --platform=win32 --arch=x64 --out=dist --overwrite --icon=electron/icon.ico",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
-  "keywords": [
-    "electron",
-    "nextjs",
-    "typescript",
-    "medical",
-    "nurse",
-    "forms"
-  ],
+  "keywords": ["electron", "nextjs", "typescript", "medical", "nurse", "forms"],
   "author": "ShoreAgents",
   "license": "MIT",
   "dependencies": {
@@ -38,27 +30,32 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
+    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "lucide-react": "^0.292.0",
     "next": "14.0.3",
+    "pg": "^8.11.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.47.0",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.9.0",
+    "@types/pg": "^8.10.9",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "@types/uuid": "^9.0.7",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
     "electron": "^27.0.4",
     "electron-builder": "^24.6.4",
-    "electron-packager": "^17.1.2",
     "eslint": "^8.53.0",
     "eslint-config-next": "14.0.3",
     "postcss": "^8.4.31",
@@ -79,29 +76,13 @@
       "package.json"
     ],
     "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "sign": false
+      "target": "nsis"
     },
     "mac": {
       "target": "dmg"
     },
     "linux": {
       "target": "AppImage"
-    },
-    "portable": {
-      "artifactName": "ShoreAgents-Nurse-App-Portable.exe"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "publish": null
+    }
   }
-}
+} 

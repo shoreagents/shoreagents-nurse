@@ -11,39 +11,52 @@ import { PageLoader } from '@/components/ui/loading-spinner'
 import '@/styles/globals.css'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, _forceUpdate } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
     // Initialize localStorage with default data
     initializeStorage()
+  }, [])
 
-    // Aggressively prefetch all routes for instant navigation
-    if (isAuthenticated) {
-      const routes = [
-        '/',
-        '/clinic-log-form',
-        '/clinic-records',
-        '/reimbursement-form',
-        '/reimbursement-records',
-        '/inventory'
-      ]
+  useEffect(() => {
+    console.log('_app.tsx: Auth state changed:', { isAuthenticated, isLoading })
+    
+    // Handle authentication-based routing
+    if (!isLoading) {
+      if (isAuthenticated) {
+        console.log('_app.tsx: User is authenticated, prefetching routes...')
+        // User is authenticated - prefetch routes for better performance
+        const routes = [
+          '/',
+          '/clinic-log-form',
+          '/clinic-records',
+          '/reimbursement-form',
+          '/reimbursement-records',
+          '/inventory',
+          '/recent-activities'
+        ]
 
-      // Prefetch immediately
-      routes.forEach(route => {
-        router.prefetch(route)
-      })
-
-      // Prefetch again after a short delay to ensure caching
-      const timer = setTimeout(() => {
+        // Prefetch immediately
         routes.forEach(route => {
           router.prefetch(route)
         })
-      }, 500)
 
-      return () => clearTimeout(timer)
+        // Prefetch again after a short delay to ensure caching
+        const timer = setTimeout(() => {
+          routes.forEach(route => {
+            router.prefetch(route)
+          })
+        }, 500)
+
+        return () => clearTimeout(timer)
+      } else {
+        console.log('_app.tsx: User is not authenticated')
+      }
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router, _forceUpdate])
+
+  console.log('_app.tsx: Rendering with state:', { isAuthenticated, isLoading })
 
   if (isLoading) {
     return <PageLoader text="Initializing application..." />

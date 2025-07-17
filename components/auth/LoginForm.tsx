@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { loginSchema, LoginFormData } from '@/lib/validations'
 import { useToast } from '@/hooks/use-toast'
+import { useRouter } from 'next/router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,6 +22,7 @@ import {
 export function LoginForm() {
   const { login, isLoading, error } = useAuth()
   const { toast } = useToast()
+  const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
 
   const form = useForm<LoginFormData>({
@@ -49,10 +51,13 @@ export function LoginForm() {
       console.log('Login result:', result)
       
       if (result.success) {
+        console.log('Login successful!')
         toast({
           title: "Login successful",
           description: "Welcome back!",
         })
+        // Don't manually navigate - let _app.tsx handle the redirect
+        // The authentication state change will automatically show the dashboard
       } else {
         toast({
           title: "Login failed",
@@ -170,68 +175,27 @@ export function LoginForm() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={async () => {
-                  console.log('Quick login as nurse clicked')
-                  try {
-                    const result = await login({ email: 'nurse@demo.com', password: 'demo' })
-                    console.log('Quick login result:', result)
-                    if (result.success) {
-                      toast({
-                        title: "Login successful",
-                        description: "Welcome, Nurse!",
-                      })
-                    }
-                  } catch (error) {
-                    console.error('Quick login error:', error)
-                  }
-                }}
-              >
-                Login as Nurse
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={async () => {
-                  console.log('Quick login as admin clicked')
-                  try {
-                    const result = await login({ email: 'admin@demo.com', password: 'demo' })
-                    console.log('Quick login result:', result)
-                    if (result.success) {
-                      toast({
-                        title: "Login successful",
-                        description: "Welcome, Admin!",
-                      })
-                    }
-                  } catch (error) {
-                    console.error('Quick login error:', error)
-                  }
-                }}
-              >
-                Login as Admin
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={async () => {
+                console.log('Quick login as nurse clicked')
+                // Auto-fill the form fields and immediately submit
+                form.setValue('email', 'nurse@demo.com')
+                form.setValue('password', 'demo')
+                
+                // Trigger form submission
+                const formData = { email: 'nurse@demo.com', password: 'demo' }
+                await onSubmit(formData)
+              }}
+            >
+              Login as Nurse
+            </Button>
             
             <div className="text-center text-xs text-muted-foreground space-y-2">
               <p>Demo Mode: Any email/password works!</p>
-              <p>Use &quot;admin&quot; in email for admin role, otherwise defaults to nurse</p>
-              
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                onClick={() => {
-                  console.log('Emergency login button clicked')
-                  // Direct login bypass for testing
-                  window.location.reload()
-                }}
-                className="text-xs underline"
-              >
-                Having trouble? Click here to refresh
-              </Button>
+              <p>Click &quot;Login as Nurse&quot; to auto-login</p>
             </div>
           </div>
         </CardContent>

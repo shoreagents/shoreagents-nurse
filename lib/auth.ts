@@ -40,6 +40,11 @@ export class AuthService {
           isLoading: false,
           error: null
         }
+        console.log('AuthService state updated:', this.authState)
+        
+        // Force immediate sync with storage and trigger events
+        userStorage.setCurrentUser(user)
+        
         return { success: true }
       } else {
         console.log('Authentication failed - no user returned')
@@ -52,6 +57,7 @@ export class AuthService {
   }
 
   public async logout(): Promise<void> {
+    console.log('AuthService.logout called')
     userStorage.clearCurrentUser()
     this.authState = {
       user: null,
@@ -59,14 +65,19 @@ export class AuthService {
       isLoading: false,
       error: null
     }
+    console.log('AuthService state updated after logout:', this.authState)
   }
 
   public getCurrentUser(): User | null {
-    return userStorage.getCurrentUser()
+    const user = userStorage.getCurrentUser()
+    console.log('AuthService.getCurrentUser:', user)
+    return user
   }
 
   public isAuthenticated(): boolean {
-    return userStorage.getCurrentUser() !== null
+    const isAuth = userStorage.getCurrentUser() !== null
+    console.log('AuthService.isAuthenticated:', isAuth)
+    return isAuth
   }
 }
 

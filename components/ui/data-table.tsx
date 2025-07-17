@@ -276,7 +276,11 @@ export function DataTable<T extends Record<string, any>>({
                       )}
                       onClick={() => handleSort(column.key)}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className={cn(
+                        'flex items-center gap-2',
+                        column.align === 'center' && 'justify-center',
+                        column.align === 'right' && 'justify-end'
+                      )}>
                         {column.header}
                         {column.sortable && getSortIcon(column.key)}
                       </div>

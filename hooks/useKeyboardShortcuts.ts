@@ -51,16 +51,17 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
   const router = useRouter()
   const { onToggleSidebar } = options
 
-  // Aggressively preload all routes for instant navigation
-  useEffect(() => {
-    const routesToPreload = [
-      '/',
-      '/clinic-log-form',
-      '/clinic-records',
-      '/reimbursement-form',
-      '/reimbursement-records',
-      '/inventory'
-    ]
+      // Aggressively preload all routes for instant navigation
+    useEffect(() => {
+      const routesToPreload = [
+        '/',
+        '/clinic-log-form',
+        '/clinic-records',
+        '/reimbursement-form',
+        '/reimbursement-records',
+        '/inventory',
+        '/recent-activities'
+      ]
 
     // Preload immediately and again after a short delay
     const preloadRoutes = () => {
@@ -120,6 +121,12 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
       altKey: true,
       action: () => navigateToRoute('/inventory'),
       description: 'Inventory Management'
+    },
+    {
+      key: 'a',
+      altKey: true,
+      action: () => navigateToRoute('/recent-activities'),
+      description: 'Recent Activities'
     },
     ...(onToggleSidebar ? [{
       key: 's',

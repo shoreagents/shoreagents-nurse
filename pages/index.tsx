@@ -275,45 +275,8 @@ const Dashboard = React.memo(function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common tasks you can perform
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon
-                return (
-                  <Button
-                    key={action.title}
-                    variant="outline"
-                    className="h-auto p-4 justify-start"
-                    onClick={() => handleQuickAction(action.href)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-md ${action.color}`}>
-                        <Icon className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <div className="font-medium">{action.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {action.description}
-                        </div>
-                      </div>
-                    </div>
-                  </Button>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Recent Activity */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -362,10 +325,54 @@ const Dashboard = React.memo(function Dashboard() {
                     <p className="text-xs text-muted-foreground">
                       Showing 5 of {extendedStats.recentActivity.length} activities
                     </p>
+                    <Button
+                      variant="link"
+                      className="text-xs p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+                      onClick={() => router.push('/recent-activities')}
+                    >
+                      View all activity
+                    </Button>
                   </div>
                 )}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>
+              Common tasks you can perform
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4">
+              {quickActions.map((action) => {
+                const Icon = action.icon
+                return (
+                  <Button
+                    key={action.title}
+                    variant="outline"
+                    className="h-auto p-4 justify-start"
+                    onClick={() => handleQuickAction(action.href)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2 rounded-md ${action.color}`}>
+                        <Icon className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-medium">{action.title}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {action.description}
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       </div>

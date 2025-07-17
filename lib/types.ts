@@ -295,6 +295,33 @@ export interface SupplierOption {
   location?: string
 }
 
+// Client and Issuer management types
+export interface Client {
+  id: string
+  name: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  createdBy: string
+}
+
+export interface Issuer {
+  id: string
+  name: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  createdBy: string
+}
+
+export interface ClientFormData {
+  name: string
+}
+
+export interface IssuerFormData {
+  name: string
+}
+
 // Export utility types
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]

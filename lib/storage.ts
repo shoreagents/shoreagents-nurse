@@ -8,7 +8,9 @@ import {
   ActivityItem,
   InventoryMedicine,
   InventorySupply,
-  InventoryTransaction
+  InventoryTransaction,
+  Client,
+  Issuer
 } from './types'
 
 // Storage keys
@@ -23,7 +25,9 @@ const STORAGE_KEYS = {
   LAST_BACKUP: 'shoreagents_nurse_last_backup',
   INVENTORY_MEDICINES: 'shoreagents_nurse_inventory_medicines',
   INVENTORY_SUPPLIES: 'shoreagents_nurse_inventory_supplies',
-  INVENTORY_TRANSACTIONS: 'shoreagents_nurse_inventory_transactions'
+  INVENTORY_TRANSACTIONS: 'shoreagents_nurse_inventory_transactions',
+  CLIENTS: 'shoreagents_nurse_clients',
+  ISSUERS: 'shoreagents_nurse_issuers'
 } as const
 
 // Helper function to safely parse JSON
@@ -134,10 +138,18 @@ export const userStorage = {
 
   setCurrentUser(user: User): void {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, safeJsonStringify(user))
+    // Dispatch custom event for immediate sync
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('authStateChanged'))
+    }
   },
 
   clearCurrentUser(): void {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER)
+    // Dispatch custom event for immediate sync
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('authStateChanged'))
+    }
   },
 
   getAllUsers(): User[] {
@@ -194,7 +206,7 @@ export const userStorage = {
     }
     
     console.log('Authentication successful for:', mockUser)
-    this.setCurrentUser(mockUser)
+    // Don't call setCurrentUser here - let AuthService handle it
     return mockUser
   }
 }
@@ -808,6 +820,162 @@ export const initializeInventory = () => {
         updatedAt: new Date()
       })
     })
+  }
+}
+
+// Client storage utility
+export const clientStorage = {
+  getAll: (): Client[] => {
+    if (!isLocalStorageAvailable()) return []
+    const data = localStorage.getItem(STORAGE_KEYS.CLIENTS)
+    return safeJsonParse(data, []).map((client: any) => ({
+      ...client,
+      createdAt: new Date(client.createdAt),
+      updatedAt: new Date(client.updatedAt)
+    }))
+  },
+
+  getActive: (): Client[] => {
+    return clientStorage.getAll().filter(client => client.isActive)
+  },
+
+  getById: (id: string): Client | null => {
+    const clients = clientStorage.getAll()
+    return clients.find(client => client.id === id) || null
+  },
+
+  save: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Client => {
+    const clients = clientStorage.getAll()
+    const now = new Date()
+    const newClient: Client = {
+      ...client,
+      id: generateUUID(),
+      createdAt: now,
+      updatedAt: now
+    }
+    
+    clients.push(newClient)
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients))
+    }
+    
+    return newClient
+  },
+
+  update: (id: string, updates: Partial<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>): Client | null => {
+    const clients = clientStorage.getAll()
+    const clientIndex = clients.findIndex(client => client.id === id)
+    
+    if (clientIndex === -1) return null
+    
+    const updatedClient = {
+      ...clients[clientIndex],
+      ...updates,
+      updatedAt: new Date()
+    }
+    
+    clients[clientIndex] = updatedClient
+    
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients))
+    }
+    
+    return updatedClient
+  },
+
+  delete: (id: string): boolean => {
+    const clients = clientStorage.getAll()
+    const filteredClients = clients.filter(client => client.id !== id)
+    
+    if (filteredClients.length === clients.length) return false
+    
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(filteredClients))
+    }
+    
+    return true
+  },
+
+  deactivate: (id: string): boolean => {
+    return clientStorage.update(id, { isActive: false }) !== null
+  }
+}
+
+// Issuer storage utility
+export const issuerStorage = {
+  getAll: (): Issuer[] => {
+    if (!isLocalStorageAvailable()) return []
+    const data = localStorage.getItem(STORAGE_KEYS.ISSUERS)
+    return safeJsonParse(data, []).map((issuer: any) => ({
+      ...issuer,
+      createdAt: new Date(issuer.createdAt),
+      updatedAt: new Date(issuer.updatedAt)
+    }))
+  },
+
+  getActive: (): Issuer[] => {
+    return issuerStorage.getAll().filter(issuer => issuer.isActive)
+  },
+
+  getById: (id: string): Issuer | null => {
+    const issuers = issuerStorage.getAll()
+    return issuers.find(issuer => issuer.id === id) || null
+  },
+
+  save: (issuer: Omit<Issuer, 'id' | 'createdAt' | 'updatedAt'>): Issuer => {
+    const issuers = issuerStorage.getAll()
+    const now = new Date()
+    const newIssuer: Issuer = {
+      ...issuer,
+      id: generateUUID(),
+      createdAt: now,
+      updatedAt: now
+    }
+    
+    issuers.push(newIssuer)
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.ISSUERS, JSON.stringify(issuers))
+    }
+    
+    return newIssuer
+  },
+
+  update: (id: string, updates: Partial<Omit<Issuer, 'id' | 'createdAt' | 'updatedAt'>>): Issuer | null => {
+    const issuers = issuerStorage.getAll()
+    const issuerIndex = issuers.findIndex(issuer => issuer.id === id)
+    
+    if (issuerIndex === -1) return null
+    
+    const updatedIssuer = {
+      ...issuers[issuerIndex],
+      ...updates,
+      updatedAt: new Date()
+    }
+    
+    issuers[issuerIndex] = updatedIssuer
+    
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.ISSUERS, JSON.stringify(issuers))
+    }
+    
+    return updatedIssuer
+  },
+
+  delete: (id: string): boolean => {
+    const issuers = issuerStorage.getAll()
+    const filteredIssuers = issuers.filter(issuer => issuer.id !== id)
+    
+    if (filteredIssuers.length === issuers.length) return false
+    
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem(STORAGE_KEYS.ISSUERS, JSON.stringify(issuers))
+    }
+    
+    return true
+  },
+
+  deactivate: (id: string): boolean => {
+    return issuerStorage.update(id, { isActive: false }) !== null
   }
 }
 

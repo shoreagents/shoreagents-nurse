@@ -10,11 +10,13 @@ import {
   activityStorage, 
   userStorage,
   inventoryMedicineStorage,
-  inventorySupplyStorage 
+  inventorySupplyStorage,
+  clientStorage,
+  issuerStorage
 } from '@/lib/storage'
 import { clinicLogFormSchema } from '@/lib/validations'
-import { ClinicLogFormData, MedicineItem, SupplyItem, InventoryMedicine, InventorySupply } from '@/lib/types'
-import { PageWrapper } from '@/components/layout/PageWrapper'
+import { ClinicLogFormData, MedicineItem, SupplyItem, InventoryMedicine, InventorySupply, Client, Issuer } from '@/lib/types'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,24 +34,30 @@ export default function ClinicLogForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [medicines, setMedicines] = useState<InventoryMedicine[]>([])
   const [supplies, setSupplies] = useState<InventorySupply[]>([])
+  const [clients, setClients] = useState<Client[]>([])
+  const [issuers, setIssuers] = useState<Issuer[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Load inventory data on component mount
+  // Load data on component mount
   useEffect(() => {
-    const loadInventory = async () => {
+    const loadData = async () => {
       try {
         setLoading(true)
-        const [medicineData, supplyData] = await Promise.all([
+        const [medicineData, supplyData, clientData, issuerData] = await Promise.all([
           Promise.resolve(inventoryMedicineStorage.getActive()),
-          Promise.resolve(inventorySupplyStorage.getActive())
+          Promise.resolve(inventorySupplyStorage.getActive()),
+          Promise.resolve(clientStorage.getActive()),
+          Promise.resolve(issuerStorage.getActive())
         ])
         setMedicines(medicineData)
         setSupplies(supplyData)
+        setClients(clientData)
+        setIssuers(issuerData)
       } catch (error) {
-        console.error('Error loading inventory:', error)
+        console.error('Error loading data:', error)
         toast({
           title: 'Error',
-          description: 'Failed to load inventory data',
+          description: 'Failed to load form data',
           variant: 'destructive'
         })
       } finally {
@@ -57,7 +65,7 @@ export default function ClinicLogForm() {
       }
     }
 
-    loadInventory()
+    loadData()
   }, [toast])
 
   // Helper function to get medicine display name
@@ -271,18 +279,19 @@ export default function ClinicLogForm() {
   }
 
   return (
-    <PageWrapper title="Clinic Medicines and Supplies Log Form">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-6 w-6 text-blue-600" />
-            Clinic Medicines and Supplies Log Form
-          </CardTitle>
-          <CardDescription>
-            Log the medicines and supplies issued to patients during clinic visits.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-6 w-6 text-blue-600" />
+              Clinic Medicines and Supplies Log Form
+            </CardTitle>
+            <CardDescription>
+              Log the medicines and supplies issued to patients during clinic visits.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Date */}
@@ -383,7 +392,18 @@ export default function ClinicLogForm() {
                   <FormItem>
                     <FormLabel>Client *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter client/company name" {...field} />
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.name}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -629,7 +649,18 @@ export default function ClinicLogForm() {
                   <FormItem>
                     <FormLabel>Issued By *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex. Nurse Ron / Thirdy" {...field} />
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an issuer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {issuers.map((issuer) => (
+                            <SelectItem key={issuer.id} value={issuer.name}>
+                              {issuer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -660,6 +691,7 @@ export default function ClinicLogForm() {
           </Form>
         </CardContent>
       </Card>
-    </PageWrapper>
+      </div>
+    </div>
   )
 } 

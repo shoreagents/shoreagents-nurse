@@ -11,7 +11,9 @@ import {
   Database,
   Menu,
   X,
-  Warehouse
+  Warehouse,
+  Users,
+  Activity
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
@@ -48,6 +50,13 @@ const navigationSections: NavigationSection[] = [
         href: '/',
         icon: Home,
         requiredPermission: permissions.canViewDashboard
+      },
+      {
+        id: 'recent-activities',
+        label: 'Recent Activities',
+        href: '/recent-activities',
+        icon: Activity,
+        requiredPermission: permissions.canViewDashboard
       }
     ]
   },
@@ -73,20 +82,6 @@ const navigationSections: NavigationSection[] = [
     ]
   },
   {
-    id: 'inventory',
-    label: 'Inventory',
-    icon: Warehouse,
-    items: [
-      {
-        id: 'inventory-management',
-        label: 'Inventory Management',
-        href: '/inventory',
-        icon: Package,
-        requiredPermission: permissions.canViewInventory
-      }
-    ]
-  },
-  {
     id: 'records',
     label: 'Records',
     icon: Database,
@@ -104,6 +99,34 @@ const navigationSections: NavigationSection[] = [
         href: '/reimbursement-records',
         icon: Receipt,
         requiredPermission: permissions.canViewReimbursements
+      }
+    ]
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    icon: Warehouse,
+    items: [
+      {
+        id: 'inventory-management',
+        label: 'Inventory Management',
+        href: '/inventory',
+        icon: Package,
+        requiredPermission: permissions.canViewInventory
+      }
+    ]
+  },
+  {
+    id: 'management',
+    label: 'Management',
+    icon: Users,
+    items: [
+      {
+        id: 'client-issuer-management',
+        label: 'Clients & Issuers',
+        href: '/client-issuer-management',
+        icon: Users,
+        requiredPermission: permissions.canCreateClinicLog // Using existing permission for now
       }
     ]
   }

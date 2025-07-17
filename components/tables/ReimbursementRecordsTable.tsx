@@ -11,11 +11,12 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { useToast } from '@/hooks/use-toast'
 import { Reimbursement } from '@/lib/types'
 import { reimbursementStorage, userStorage, activityStorage } from '@/lib/storage'
 import { reimbursementFormSchema, type ReimbursementFormData } from '@/lib/validations'
-import { Eye, Edit, Trash2, Calendar, User, MapPin, Receipt, CheckCircle, XCircle, Clock, Mail, Banknote, Save, X } from 'lucide-react'
+import { Eye, Edit, Trash2, Calendar, User, MapPin, Receipt, CheckCircle, XCircle, Clock, Mail, Banknote, Save, X, MoreHorizontal } from 'lucide-react'
 
 interface ReimbursementRecordsTableProps {
   className?: string
@@ -469,53 +470,44 @@ const ReimbursementRecordsTable = React.memo(function ReimbursementRecordsTable(
       header: 'Actions',
       align: 'center',
       render: (value, record) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleViewRecord(record)}
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditRecord(record)}
-            className="text-blue-600 hover:text-blue-700"
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          
-          {record.status === 'pending' && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleApprove(String(value || ''))}
-                className="text-green-600 hover:text-green-700"
-              >
-                <CheckCircle className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleReject(String(value || ''))}
-                className="text-red-600 hover:text-red-700"
-              >
-                <XCircle className="w-4 h-4" />
-              </Button>
-            </>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(String(value || ''))}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleViewRecord(record)}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEditRecord(record)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            {record.status === 'pending' && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleApprove(String(value || ''))}>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleReject(String(value || ''))}>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Reject
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => handleDelete(String(value || ''))}
+              className="text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     }
   ], [handleApprove, handleDelete, handleReject, handleEditRecord])
