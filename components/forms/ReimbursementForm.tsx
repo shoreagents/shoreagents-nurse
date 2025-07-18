@@ -16,7 +16,7 @@ import { reimbursementStorage, userStorage, activityStorage } from '@/lib/storag
 import type { Reimbursement } from '@/lib/types'
 import { Banknote, Save, RotateCcw } from 'lucide-react'
 
-export default function ReimbursementForm() {
+const ReimbursementForm = React.memo(() => {
   const { user } = useAuth()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -317,4 +317,8 @@ export default function ReimbursementForm() {
       </div>
     </div>
   )
-} 
+})
+
+ReimbursementForm.displayName = 'ReimbursementForm'
+
+export default ReimbursementForm 

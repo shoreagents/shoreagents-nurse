@@ -13,7 +13,8 @@ import {
   X,
   Warehouse,
   Users,
-  Activity
+  Activity,
+  Heart
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
@@ -57,6 +58,20 @@ const navigationSections: NavigationSection[] = [
         href: '/recent-activities',
         icon: Activity,
         requiredPermission: permissions.canViewDashboard
+      }
+    ]
+  },
+  {
+    id: 'agents',
+    label: 'Agents',
+    icon: Users,
+    items: [
+      {
+        id: 'health-checks',
+        label: 'Health Checks',
+        href: '/health-checks',
+        icon: Heart,
+        requiredPermission: permissions.canViewClinicLogs
       }
     ]
   },

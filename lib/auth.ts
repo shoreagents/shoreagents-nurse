@@ -20,11 +20,8 @@ export class AuthService {
   }
 
   public async login(credentials: LoginCredentials): Promise<{ success: boolean; error?: string }> {
-    console.log('AuthService.login called with:', credentials)
-    
     // Basic validation
     if (!credentials.email || !credentials.password) {
-      console.log('Missing email or password')
       return { success: false, error: 'Email and password are required' }
     }
 
@@ -33,31 +30,26 @@ export class AuthService {
       const user = userStorage.authenticateUser(credentials.email, credentials.password)
       
       if (user) {
-        console.log('User authenticated successfully:', user)
         this.authState = {
           user,
           isAuthenticated: true,
           isLoading: false,
           error: null
         }
-        console.log('AuthService state updated:', this.authState)
         
         // Force immediate sync with storage and trigger events
         userStorage.setCurrentUser(user)
         
         return { success: true }
       } else {
-        console.log('Authentication failed - no user returned')
         return { success: false, error: 'Authentication failed' }
       }
     } catch (error) {
-      console.error('AuthService login error:', error)
       return { success: false, error: 'Authentication error occurred' }
     }
   }
 
   public async logout(): Promise<void> {
-    console.log('AuthService.logout called')
     userStorage.clearCurrentUser()
     this.authState = {
       user: null,
@@ -65,19 +57,14 @@ export class AuthService {
       isLoading: false,
       error: null
     }
-    console.log('AuthService state updated after logout:', this.authState)
   }
 
   public getCurrentUser(): User | null {
-    const user = userStorage.getCurrentUser()
-    console.log('AuthService.getCurrentUser:', user)
-    return user
+    return userStorage.getCurrentUser()
   }
 
   public isAuthenticated(): boolean {
-    const isAuth = userStorage.getCurrentUser() !== null
-    console.log('AuthService.isAuthenticated:', isAuth)
-    return isAuth
+    return userStorage.getCurrentUser() !== null
   }
 }
 

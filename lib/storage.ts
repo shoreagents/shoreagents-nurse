@@ -10,7 +10,8 @@ import {
   InventorySupply,
   InventoryTransaction,
   Client,
-  Issuer
+  Issuer,
+  HealthCheckRequest
 } from './types'
 
 // Storage keys
@@ -27,7 +28,8 @@ const STORAGE_KEYS = {
   INVENTORY_SUPPLIES: 'shoreagents_nurse_inventory_supplies',
   INVENTORY_TRANSACTIONS: 'shoreagents_nurse_inventory_transactions',
   CLIENTS: 'shoreagents_nurse_clients',
-  ISSUERS: 'shoreagents_nurse_issuers'
+  ISSUERS: 'shoreagents_nurse_issuers',
+  HEALTH_CHECKS: 'shoreagents_nurse_health_checks'
 } as const
 
 // Helper function to safely parse JSON
@@ -153,17 +155,12 @@ export const userStorage = {
   },
 
   getAllUsers(): User[] {
-    console.log('Getting all users...')
-    
     if (!isLocalStorageAvailable()) {
-      console.error('localStorage is not available, returning default users')
       return DEFAULT_USERS
     }
     
     const usersJson = localStorage.getItem(STORAGE_KEYS.USERS)
-    console.log('Users JSON from localStorage:', usersJson)
     const users = safeJsonParse<User[]>(usersJson, DEFAULT_USERS)
-    console.log('Parsed users:', users)
     
     return users.map(user => ({
       ...user,
@@ -177,8 +174,6 @@ export const userStorage = {
   },
 
   authenticateUser(email: string, password: string): User | null {
-    console.log('Attempting authentication for:', email)
-    
     // Super simple authentication - any email/password works
     // Just determine role based on email content
     let role: 'nurse' | 'admin' = 'nurse'
@@ -205,7 +200,6 @@ export const userStorage = {
       updatedAt: new Date()
     }
     
-    console.log('Authentication successful for:', mockUser)
     // Don't call setCurrentUser here - let AuthService handle it
     return mockUser
   }
@@ -710,6 +704,66 @@ export const inventoryTransactionStorage = {
   }
 } 
 
+// Health Check storage management
+export const healthCheckStorage = {
+  getAll(): HealthCheckRequest[] {
+    const healthChecksJson = localStorage.getItem(STORAGE_KEYS.HEALTH_CHECKS)
+    const healthChecks = safeJsonParse<HealthCheckRequest[]>(healthChecksJson, [])
+    
+    return healthChecks.map(request => ({
+      ...request,
+      requestDate: new Date(request.requestDate),
+      notifiedAt: request.notifiedAt ? new Date(request.notifiedAt) : undefined,
+      arrivedAt: request.arrivedAt ? new Date(request.arrivedAt) : undefined,
+      completedAt: request.completedAt ? new Date(request.completedAt) : undefined,
+      createdAt: new Date(request.createdAt),
+      updatedAt: new Date(request.updatedAt)
+    }))
+  },
+
+  save(request: HealthCheckRequest): void {
+    const requests = this.getAll()
+    const existingIndex = requests.findIndex(r => r.id === request.id)
+    
+    if (existingIndex >= 0) {
+      requests[existingIndex] = { ...request, updatedAt: new Date() }
+    } else {
+      requests.push({ ...request, id: generateUUID(), createdAt: new Date(), updatedAt: new Date() })
+    }
+    
+    localStorage.setItem(STORAGE_KEYS.HEALTH_CHECKS, safeJsonStringify(requests))
+  },
+
+  delete(id: string): void {
+    const requests = this.getAll().filter(request => request.id !== id)
+    localStorage.setItem(STORAGE_KEYS.HEALTH_CHECKS, safeJsonStringify(requests))
+  },
+
+  getById(id: string): HealthCheckRequest | null {
+    const requests = this.getAll()
+    return requests.find(request => request.id === id) || null
+  },
+
+  getByStatus(status: string): HealthCheckRequest[] {
+    return this.getAll().filter(request => request.status === status)
+  },
+
+  updateStatus(id: string, status: string, additionalData: any = {}): void {
+    const requests = this.getAll()
+    const requestIndex = requests.findIndex(r => r.id === id)
+    
+    if (requestIndex >= 0) {
+      requests[requestIndex] = {
+        ...requests[requestIndex],
+        status: status as any,
+        ...additionalData,
+        updatedAt: new Date()
+      }
+      localStorage.setItem(STORAGE_KEYS.HEALTH_CHECKS, safeJsonStringify(requests))
+    }
+  }
+}
+
 // Initialize default inventory data
 export const initializeInventory = () => {
   const medicines = inventoryMedicineStorage.getAll()
@@ -1001,4 +1055,38 @@ export const initializeStorage = () => {
 
   // Initialize inventory
   initializeInventory()
+  
+  // Initialize health checks with sample data if not present
+  const healthChecks = localStorage.getItem(STORAGE_KEYS.HEALTH_CHECKS)
+  if (!healthChecks) {
+    const sampleHealthChecks: HealthCheckRequest[] = [
+      {
+        id: generateUUID(),
+        agentName: 'John Doe',
+        client: 'TechCorp Inc.',
+        employeeId: 'TC001',
+        requestDate: new Date(),
+        status: 'pending',
+        requestType: 'routine',
+        notes: 'Annual health check',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: generateUUID(),
+        agentName: 'Jane Smith', 
+        client: 'Healthcare Solutions',
+        employeeId: 'HS002',
+        requestDate: new Date(),
+        status: 'notified',
+        requestType: 'urgent',
+        notes: 'Pre-employment medical exam',
+        notifiedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]
+    
+    localStorage.setItem(STORAGE_KEYS.HEALTH_CHECKS, safeJsonStringify(sampleHealthChecks))
+  }
 } 

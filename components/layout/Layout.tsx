@@ -1,5 +1,4 @@
 import React from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/layout/Header'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Toaster } from '@/components/ui/toaster'
@@ -10,7 +9,6 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { isAuthenticated, isLoading } = useAuth()
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
   
   const toggleSidebar = () => {
@@ -19,23 +17,6 @@ export function Layout({ children }: LayoutProps) {
 
   // Enable global keyboard shortcuts with sidebar toggle
   useGlobalShortcuts({ onToggleSidebar: toggleSidebar })
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background">
-        {children}
-        <Toaster />
-      </div>
-    )
-  }
 
   return (
     <div className="flex h-screen bg-background">

@@ -28,7 +28,7 @@ import { Separator } from '@/components/ui/separator'
 import { AlertTriangle, Package, Plus, Trash2, Calendar, User, MapPin, FileText, Pill } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
-export default function ClinicLogForm() {
+const ClinicLogForm = React.memo(() => {
   const { user } = useAuth()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -694,4 +694,8 @@ export default function ClinicLogForm() {
       </div>
     </div>
   )
-} 
+})
+
+ClinicLogForm.displayName = 'ClinicLogForm'
+
+export default ClinicLogForm 

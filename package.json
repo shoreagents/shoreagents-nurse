@@ -8,12 +8,24 @@
     "dev:next": "next dev -p 3000",
     "dev:electron": "wait-on tcp:3000 && electron .",
     "build": "next build",
-    "build:electron": "npm run build && electron-builder",
+    "build:export": "cross-env NODE_ENV=production next build",
+    "build:electron": "npm run build:export && electron-builder",
+    "build:portable": "npm run build:export && electron-builder --win portable",
+    "build:installer": "npm run build:export && electron-builder --win nsis",
+    "build:all": "npm run build:export && electron-builder --win",
+    "build:portable-script": "node build-scripts/build-portable.js",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
-  "keywords": ["electron", "nextjs", "typescript", "medical", "nurse", "forms"],
+  "keywords": [
+    "electron",
+    "nextjs",
+    "typescript",
+    "medical",
+    "nurse",
+    "forms"
+  ],
   "author": "ShoreAgents",
   "license": "MIT",
   "dependencies": {
@@ -54,6 +66,7 @@
     "@types/uuid": "^9.0.7",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
     "electron": "^27.0.4",
     "electron-builder": "^24.6.4",
     "eslint": "^8.53.0",
@@ -67,22 +80,61 @@
     "appId": "com.shoreagents.nurse-app",
     "productName": "ShoreAgents Nurse App",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
     "files": [
       "electron/",
-      ".next/",
+      "out/",
       "node_modules/",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "out",
+        "to": "app",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-portable.${ext}",
+      "verifyUpdateCodeSignature": false,
+      "signAndEditExecutable": false
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "build/icon.icns"
     },
     "linux": {
-      "target": "AppImage"
-    }
+      "target": "AppImage",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "forceCodeSigning": false
   }
-} 
+}

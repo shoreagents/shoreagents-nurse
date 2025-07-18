@@ -11,7 +11,7 @@ import { PageLoader } from '@/components/ui/loading-spinner'
 import '@/styles/globals.css'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { isAuthenticated, isLoading, _forceUpdate } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -20,15 +20,13 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [])
 
   useEffect(() => {
-    console.log('_app.tsx: Auth state changed:', { isAuthenticated, isLoading })
-    
     // Handle authentication-based routing
     if (!isLoading) {
       if (isAuthenticated) {
-        console.log('_app.tsx: User is authenticated, prefetching routes...')
         // User is authenticated - prefetch routes for better performance
         const routes = [
           '/',
+          '/health-checks',
           '/clinic-log-form',
           '/clinic-records',
           '/reimbursement-form',
@@ -50,13 +48,9 @@ export default function App({ Component, pageProps }: AppProps) {
         }, 500)
 
         return () => clearTimeout(timer)
-      } else {
-        console.log('_app.tsx: User is not authenticated')
       }
     }
-  }, [isAuthenticated, isLoading, router, _forceUpdate])
-
-  console.log('_app.tsx: Rendering with state:', { isAuthenticated, isLoading })
+  }, [isAuthenticated, isLoading, router])
 
   if (isLoading) {
     return <PageLoader text="Initializing application..." />

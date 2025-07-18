@@ -55,6 +55,7 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
     useEffect(() => {
       const routesToPreload = [
         '/',
+        '/health-checks',
         '/clinic-log-form',
         '/clinic-records',
         '/reimbursement-form',
@@ -91,6 +92,12 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
       altKey: true,
       action: () => navigateToRoute('/'),
       description: 'Go to Dashboard'
+    },
+    {
+      key: 'g',
+      altKey: true,
+      action: () => navigateToRoute('/health-checks'),
+      description: 'Health Checks'
     },
     {
       key: 'c',

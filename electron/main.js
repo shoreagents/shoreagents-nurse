@@ -26,6 +26,8 @@ function createWindow() {
 
   console.log('Loading URL:', url);
   console.log('isDev:', isDev);
+  console.log('__dirname:', __dirname);
+  console.log('app.isPackaged:', app.isPackaged);
 
   // Add a small delay for development to ensure Next.js is ready
   if (isDev) {
@@ -33,7 +35,23 @@ function createWindow() {
       mainWindow.loadURL(url);
     }, 1000);
   } else {
-    mainWindow.loadURL(url);
+    // For production, try multiple possible paths
+    const possiblePaths = [
+      path.join(__dirname, '../out/index.html'),
+      path.join(__dirname, '../app/index.html'),
+      path.join(process.resourcesPath, 'app/index.html')
+    ];
+    
+    let loadPath = possiblePaths[0];
+    for (const possiblePath of possiblePaths) {
+      if (require('fs').existsSync(possiblePath)) {
+        loadPath = possiblePath;
+        break;
+      }
+    }
+    
+    console.log('Loading from:', loadPath);
+    mainWindow.loadFile(loadPath);
   }
 
   mainWindow.once('ready-to-show', () => {

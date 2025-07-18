@@ -34,8 +34,6 @@ export function LoginForm() {
   })
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('Form submitted with data:', data)
-    
     // Extra validation - make sure we have email and password
     if (!data.email || !data.password) {
       toast({
@@ -48,10 +46,8 @@ export function LoginForm() {
     
     try {
       const result = await login(data)
-      console.log('Login result:', result)
       
       if (result.success) {
-        console.log('Login successful!')
         toast({
           title: "Login successful",
           description: "Welcome back!",
@@ -66,7 +62,6 @@ export function LoginForm() {
         })
       }
     } catch (error) {
-      console.error('Login error:', error)
       toast({
         title: "Login failed",
         description: "An unexpected error occurred. Please try again.",
@@ -152,11 +147,6 @@ export function LoginForm() {
                 type="submit"
                 className="w-full"
                 disabled={isLoading}
-                onClick={(e) => {
-                  console.log('Sign in button clicked')
-                  console.log('Form values:', form.getValues())
-                  // Don't prevent default - let the form handle it
-                }}
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
@@ -180,7 +170,6 @@ export function LoginForm() {
               variant="outline"
               className="w-full"
               onClick={async () => {
-                console.log('Quick login as nurse clicked')
                 // Auto-fill the form fields and immediately submit
                 form.setValue('email', 'nurse@demo.com')
                 form.setValue('password', 'demo')

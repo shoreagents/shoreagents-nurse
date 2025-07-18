@@ -26,7 +26,7 @@ import {
 import { useRouter } from 'next/router'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 
-const Dashboard = React.memo(function Dashboard() {
+function Dashboard() {
   const { user } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState(() => dashboardStorage.getStats())
@@ -380,6 +380,6 @@ const Dashboard = React.memo(function Dashboard() {
       </div>
     </div>
   )
-})
+}
 
 export default Dashboard 

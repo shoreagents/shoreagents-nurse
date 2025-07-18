@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { format } from 'date-fns'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -272,7 +272,7 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       clinicLogStorage.delete(id)
       const updatedData = clinicLogStorage.getAll()
@@ -291,9 +291,9 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
         variant: 'destructive'
       })
     }
-  }
+  }, [toast])
 
-  const handleEditRecord = (record: ClinicLog) => {
+  const handleEditRecord = useCallback((record: ClinicLog) => {
     setEditingRecord(record)
     editForm.reset({
       date: new Date(record.date),
@@ -308,7 +308,7 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
       issuedBy: record.issuedBy
     })
     setEditDialogOpen(true)
-  }
+  }, [editForm])
 
   const handleSaveEdit = async (formData: ClinicLogFormData) => {
     if (!editingRecord) return

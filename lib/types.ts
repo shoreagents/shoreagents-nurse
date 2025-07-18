@@ -332,4 +332,31 @@ export type Required<T, K extends keyof T> = T & RequiredFields<T, K>
 
 type RequiredFields<T, K extends keyof T> = {
   [P in K]-?: T[P]
+}
+
+// Health Check types
+export interface HealthCheckRequest {
+  id: string
+  agentName: string
+  client: string
+  employeeId: string
+  requestDate: Date
+  status: 'pending' | 'notified' | 'in_clinic' | 'completed'
+  requestType: 'routine' | 'urgent' | 'pre_employment' | 'other'
+  notes?: string
+  notifiedAt?: Date
+  arrivedAt?: Date
+  completedAt?: Date
+  nurseId?: string
+  nurseName?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface HealthCheckFormData {
+  agentName: string
+  client: string
+  employeeId: string
+  requestType: 'routine' | 'urgent' | 'pre_employment' | 'other'
+  notes?: string
 } 

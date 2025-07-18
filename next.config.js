@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
+  // Only use static export for production builds
+  ...(process.env.NODE_ENV === 'production' && {
+    output: 'export',
+    trailingSlash: true,
+    distDir: 'out',
+    assetPrefix: './',
+  }),
   images: {
     unoptimized: true,
   },
+  swcMinify: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.target = 'electron-renderer';
