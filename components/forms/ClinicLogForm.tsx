@@ -71,24 +71,24 @@ const ClinicLogForm = React.memo(() => {
   // Helper function to get medicine display name
   const getMedicineDisplayName = (name: string): string => {
     const medicine = medicines.find(m => m.name === name)
-    return medicine ? medicine.displayName : name
+    return medicine ? medicine.name : name
   }
 
   // Helper function to get supply display name
   const getSupplyDisplayName = (name: string): string => {
     const supply = supplies.find(s => s.name === name)
-    return supply ? supply.displayName : name
+    return supply ? supply.name : name
   }
 
   // Helper function to get stock info
-  const getMedicineStock = (name: string): { stock: number; unit: string } => {
+  const getMedicineStock = (name: string): { stock: number } => {
     const medicine = medicines.find(m => m.name === name)
-    return medicine ? { stock: medicine.stock, unit: medicine.unit } : { stock: 0, unit: '' }
+    return medicine ? { stock: medicine.stock } : { stock: 0 }
   }
 
-  const getSupplyStock = (name: string): { stock: number; unit: string } => {
+  const getSupplyStock = (name: string): { stock: number } => {
     const supply = supplies.find(s => s.name === name)
-    return supply ? { stock: supply.stock, unit: supply.unit } : { stock: 0, unit: '' }
+    return supply ? { stock: supply.stock } : { stock: 0 }
   }
 
   // Optimize form initialization - use useMemo to prevent re-computation
@@ -170,7 +170,7 @@ const ClinicLogForm = React.memo(() => {
       const inventoryMedicine = medicines.find(m => m.name === medicine.name)
       if (inventoryMedicine) {
         inventoryMedicineStorage.updateStock(
-          inventoryMedicine.id,
+          inventoryMedicine.id.toString(),
           -medicine.quantity,
           `Used in clinic log for ${data.firstName} ${data.lastName}`,
           currentUser.id,
@@ -184,7 +184,7 @@ const ClinicLogForm = React.memo(() => {
       const inventorySupply = supplies.find(s => s.name === supply.name)
       if (inventorySupply) {
         inventorySupplyStorage.updateStock(
-          inventorySupply.id,
+          inventorySupply.id.toString(),
           -supply.quantity,
           `Used in clinic log for ${data.firstName} ${data.lastName}`,
           currentUser.id,
@@ -292,405 +292,437 @@ const ClinicLogForm = React.memo(() => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-          <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Date */}
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Name Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter last name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter first name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Sex and Employee Number */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="sex"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sex *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sex" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="employeeNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Employee Number *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter employee number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Client */}
-              <FormField
-                control={form.control}
-                name="client"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Client *</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {clients.map((client) => (
-                            <SelectItem key={client.id} value={client.name}>
-                              {client.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Chief Complaint */}
-              <FormField
-                control={form.control}
-                name="chiefComplaint"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Chief Complaint/Illness *</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter chief complaint (Ex. Headache, Abdominal Pain, Cough, Colds)"
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Medicines Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Pill className="h-5 w-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold">Medicines</h3>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addMedicine}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Medicine
-                  </Button>
-                </div>
-
-                {medicineFields.map((field, index) => (
-                  <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-blue-50">
-                    <div className="flex-1">
+            <div className="space-y-6">
+              <Form {...form}>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Patient Information Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-blue-600" />
+                        Patient Information
+                      </CardTitle>
+                      <CardDescription>
+                        Enter the patient's basic information and visit details.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Date */}
                       <FormField
-                        control={control}
-                        name={`medicines.${index}.name`}
+                        control={form.control}
+                        name="date"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Medicine *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select medicine" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="max-h-[200px] overflow-y-auto">
-                                {medicines.map((medicine: InventoryMedicine) => {
-                                  const isOutOfStock = medicine.stock === 0
-                                  const isLowStock = medicine.stock <= medicine.reorderLevel
-                                  return (
-                                    <SelectItem 
-                                      key={medicine.id} 
-                                      value={medicine.name}
-                                      disabled={isOutOfStock}
-                                      className={isOutOfStock ? 'text-gray-400' : ''}
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <span>{medicine.displayName || medicine.name}</span>
-                                        <div className="flex items-center gap-2 ml-2">
-                                          <Badge 
-                                            variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
-                                            className="text-xs"
-                                          >
-                                            {medicine.stock} {medicine.unit}
-                                          </Badge>
-                                          {isOutOfStock && (
-                                            <AlertTriangle className="h-3 w-3 text-red-500" />
-                                          )}
-                                        </div>
-                                      </div>
-                                    </SelectItem>
-                                  )
-                                })}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="w-32">
-                      <FormField
-                        control={control}
-                        name={`medicines.${index}.quantity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Quantity *</FormLabel>
+                            <FormLabel>Date *</FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
-                                min="1"
-                                step="1"
-                                placeholder="1"
+                                type="date"
                                 {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                                onChange={(e) => field.onChange(new Date(e.target.value))}
                               />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </div>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeMedicine(index)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                      {/* Name Fields */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter last name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter first name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-              {/* Supplies Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-green-600" />
-                    <h3 className="text-lg font-semibold">Supplies</h3>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addSupply}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Supply
-                  </Button>
-                </div>
+                      {/* Sex and Employee Number */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="sex"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Sex *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select sex" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Male">Male</SelectItem>
+                                  <SelectItem value="Female">Female</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="employeeNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Employee Number *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter employee number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                {supplyFields.map((field, index) => (
-                  <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-green-50">
-                    <div className="flex-1">
+                      {/* Client */}
                       <FormField
-                        control={control}
-                        name={`supplies.${index}.name`}
+                        control={form.control}
+                        name="client"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Supply *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
+                            <FormLabel>Client *</FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select supply" />
+                                  <SelectValue placeholder="Select a client" />
                                 </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="max-h-[200px] overflow-y-auto">
-                                {supplies.map((supply: InventorySupply) => {
-                                  const isOutOfStock = supply.stock === 0
-                                  const isLowStock = supply.stock <= supply.reorderLevel
-                                  return (
-                                    <SelectItem 
-                                      key={supply.id} 
-                                      value={supply.name}
-                                      disabled={isOutOfStock}
-                                      className={isOutOfStock ? 'text-gray-400' : ''}
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <span>{supply.displayName || supply.name}</span>
-                                        <div className="flex items-center gap-2 ml-2">
-                                          <Badge 
-                                            variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
-                                            className="text-xs"
-                                          >
-                                            {supply.stock} {supply.unit}
-                                          </Badge>
-                                          {isOutOfStock && (
-                                            <AlertTriangle className="h-3 w-3 text-red-500" />
-                                          )}
-                                        </div>
-                                      </div>
+                                <SelectContent>
+                                  {clients.map((client) => (
+                                    <SelectItem key={client.id} value={client.name}>
+                                      {client.name}
                                     </SelectItem>
-                                  )
-                                })}
-                              </SelectContent>
-                            </Select>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </div>
 
-                    <div className="w-32">
+                      {/* Chief Complaint */}
                       <FormField
-                        control={control}
-                        name={`supplies.${index}.quantity`}
+                        control={form.control}
+                        name="chiefComplaint"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Quantity *</FormLabel>
+                            <FormLabel>Chief Complaint/Illness *</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min="1"
-                                step="1"
-                                placeholder="1"
+                              <Textarea 
+                                placeholder="Enter chief complaint (Ex. Headache, Abdominal Pain, Cough, Colds)"
+                                className="min-h-[80px]"
                                 {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                               />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </div>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeSupply(index)}
-                      className="text-red-600 hover:text-red-700"
+                      {/* Issued By */}
+                      <FormField
+                        control={form.control}
+                        name="issuedBy"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Issued By *</FormLabel>
+                            <FormControl>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select an issuer" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {issuers.map((issuer) => (
+                                    <SelectItem key={issuer.id} value={issuer.name}>
+                                      {issuer.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Medicines Section */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Pill className="h-5 w-5 text-blue-600" />
+                            Medicines
+                          </CardTitle>
+                          <CardDescription>
+                            Add medicines issued to the patient.
+                          </CardDescription>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addMedicine}
+                          className="flex items-center gap-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Medicine
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {medicineFields.map((field, index) => (
+                        <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-blue-50">
+                          <div className="flex-1">
+                            <FormField
+                              control={control}
+                              name={`medicines.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Medicine *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select medicine" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                                      {medicines.map((medicine: InventoryMedicine) => {
+                                        const isOutOfStock = medicine.stock === 0
+                                        const isLowStock = medicine.stock <= medicine.reorder_level
+                                        return (
+                                          <SelectItem 
+                                            key={medicine.id} 
+                                            value={medicine.name}
+                                            disabled={isOutOfStock}
+                                            className={isOutOfStock ? 'text-gray-400' : ''}
+                                          >
+                                            <div className="flex items-center justify-between w-full">
+                                              <span>{medicine.name}</span>
+                                              <div className="flex items-center gap-2 ml-2">
+                                                <Badge 
+                                                  variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
+                                                  className="text-xs"
+                                                >
+                                                  {medicine.stock}
+                                                </Badge>
+                                                {isOutOfStock && (
+                                                  <AlertTriangle className="h-3 w-3 text-red-500" />
+                                                )}
+                                              </div>
+                                            </div>
+                                          </SelectItem>
+                                        )
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <div className="w-32">
+                            <FormField
+                              control={control}
+                              name={`medicines.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Quantity *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      step="1"
+                                      placeholder="1"
+                                      {...field}
+                                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeMedicine(index)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Supplies Section */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Package className="h-5 w-5 text-green-600" />
+                            Supplies
+                          </CardTitle>
+                          <CardDescription>
+                            Add supplies issued to the patient.
+                          </CardDescription>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addSupply}
+                          className="flex items-center gap-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Supply
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {supplyFields.map((field, index) => (
+                        <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-green-50">
+                          <div className="flex-1">
+                            <FormField
+                              control={control}
+                              name={`supplies.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Supply *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select supply" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                                      {supplies.map((supply: InventorySupply) => {
+                                        const isOutOfStock = supply.stock === 0
+                                        const isLowStock = supply.stock <= supply.reorder_level
+                                        return (
+                                          <SelectItem 
+                                            key={supply.id} 
+                                            value={supply.name}
+                                            disabled={isOutOfStock}
+                                            className={isOutOfStock ? 'text-gray-400' : ''}
+                                          >
+                                            <div className="flex items-center justify-between w-full">
+                                              <span>{supply.name}</span>
+                                              <div className="flex items-center gap-2 ml-2">
+                                                <Badge 
+                                                  variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
+                                                  className="text-xs"
+                                                >
+                                                  {supply.stock}
+                                                </Badge>
+                                                {isOutOfStock && (
+                                                  <AlertTriangle className="h-3 w-3 text-red-500" />
+                                                )}
+                                              </div>
+                                            </div>
+                                          </SelectItem>
+                                        )
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <div className="w-32">
+                            <FormField
+                              control={control}
+                              name={`supplies.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Quantity *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      step="1"
+                                      placeholder="1"
+                                      {...field}
+                                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeSupply(index)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Form Actions */}
+                  <div className="flex justify-end space-x-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleReset}
+                      disabled={isSubmitting}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Reset
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      {isSubmitting ? 'Saving...' : 'Save Entry'}
                     </Button>
                   </div>
-                ))}
-              </div>
-
-              {/* Issued By */}
-              <FormField
-                control={form.control}
-                name="issuedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Issued By *</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an issuer" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {issuers.map((issuer) => (
-                            <SelectItem key={issuer.id} value={issuer.name}>
-                              {issuer.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleReset}
-                  disabled={isSubmitting}
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : 'Save Entry'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                </form>
+              </Form>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

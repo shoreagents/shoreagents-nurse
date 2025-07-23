@@ -20,8 +20,8 @@
     --success: 162 73% 46%;        /* emerald-success-500 */
     --success-foreground: 0 0% 100%;
     
-    /* Matrix Orange Destructive */
-    --destructive: 25 95% 53%;     /* matrix-orange-500 */
+    /* Cyber Green Destructive */
+    --destructive: 162 100% 30%;   /* cyber-green-600 */
     --destructive-foreground: 0 0% 100%;
     
     /* Muted States */
@@ -42,8 +42,8 @@
     /* Charts */
     --chart-1: 162 73% 46%;        /* cyber-green-500 */
     --chart-2: 214 84% 56%;        /* neural-blue-500 */
-    --chart-3: 25 95% 53%;         /* matrix-orange-500 */
-    --chart-4: 162 100% 30%;       /* emerald-success-600 */
+    --chart-3: 162 100% 30%;       /* cyber-green-600 */
+    --chart-4: 162 100% 24%;       /* cyber-green-700 */
     --chart-5: 252 83% 57%;        /* purple-500 */
     
     /* Radius */
@@ -75,8 +75,8 @@
     --success: 162 73% 46%;        /* emerald-success-500 */
     --success-foreground: 0 0% 100%;
     
-    /* Matrix Orange Destructive */
-    --destructive: 25 95% 53%;     /* matrix-orange-500 */
+    /* Cyber Green Destructive */
+    --destructive: 162 73% 46%;    /* cyber-green-500 for dark theme */
     --destructive-foreground: 0 0% 100%;
     
     /* Muted States */
@@ -97,8 +97,8 @@
     /* Charts */
     --chart-1: 162 73% 46%;        /* cyber-green-500 */
     --chart-2: 214 84% 56%;        /* neural-blue-500 */
-    --chart-3: 25 95% 53%;         /* matrix-orange-500 */
-    --chart-4: 162 100% 30%;       /* emerald-success-600 */
+    --chart-3: 162 100% 30%;       /* cyber-green-600 */
+    --chart-4: 162 100% 24%;       /* cyber-green-700 */
     --chart-5: 252 83% 57%;        /* purple-500 */
 
     /* Card */
@@ -155,13 +155,13 @@
   /* AI Gradients */
   --gradient-cyber-primary: linear-gradient(135deg, hsl(162, 73%, 46%), hsl(162, 100%, 30%));
   --gradient-neural-primary: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(252, 83%, 57%));
-  --gradient-matrix-primary: linear-gradient(135deg, hsl(38, 92%, 50%), hsl(32, 95%, 44%));
+  --gradient-green-primary: linear-gradient(135deg, hsl(162, 73%, 46%), hsl(162, 100%, 24%));
   --gradient-ai-hero: linear-gradient(135deg, hsl(162, 73%, 46%), hsl(217, 91%, 60%), hsl(252, 83%, 57%));
   
   /* AI Shadows/Glows */
   --shadow-cyber-glow: 0 0 20px hsla(162, 73%, 46%, 0.3);
   --shadow-neural-glow: 0 0 20px hsla(217, 91%, 60%, 0.3);
-  --shadow-matrix-glow: 0 0 20px hsla(38, 92%, 50%, 0.3);
+  --shadow-green-glow: 0 0 20px hsla(162, 100%, 30%, 0.3);
   
   /* Layout & Container */
   --container-padding: 2rem;
@@ -290,8 +290,8 @@
     background: var(--gradient-neural-primary);
   }
   
-  .bg-gradient-matrix {
-    background: var(--gradient-matrix-primary);
+  .bg-gradient-green {
+    background: var(--gradient-green-primary);
   }
   
   .bg-gradient-ai-hero {
@@ -309,8 +309,8 @@
     box-shadow: var(--shadow-neural-glow);
   }
   
-  .shadow-matrix-glow {
-    box-shadow: var(--shadow-matrix-glow);
+  .shadow-green-glow {
+    box-shadow: var(--shadow-green-glow);
   }
 }
 
@@ -430,11 +430,11 @@
   /* Ring Color Utilities */
   .ring-cyber-green-500\/20 { --tw-ring-color: hsla(162, 73%, 46%, 0.2); }
   .ring-neural-blue-500\/20 { --tw-ring-color: hsla(217, 91%, 60%, 0.2); }
-  .ring-matrix-orange-500\/20 { --tw-ring-color: hsla(38, 92%, 50%, 0.2); }
+  .ring-cyber-green-600\/20 { --tw-ring-color: hsla(162, 100%, 30%, 0.2); }
   
   .focus\:ring-cyber-green-500\/20:focus { --tw-ring-color: hsla(162, 73%, 46%, 0.2); }
   .focus\:ring-neural-blue-500\/20:focus { --tw-ring-color: hsla(217, 91%, 60%, 0.2); }
-  .focus\:ring-matrix-orange-500\/20:focus { --tw-ring-color: hsla(38, 92%, 50%, 0.2); }
+  .focus\:ring-cyber-green-600\/20:focus { --tw-ring-color: hsla(162, 100%, 30%, 0.2); }
 }
 
 /* Custom styles for the app */
@@ -487,12 +487,12 @@
     @apply shadow-neural-glow;
   }
   
-  .ai-card.matrix {
-    @apply border-matrix-orange-200 bg-gradient-to-br from-matrix-orange-50 to-white;
+  .ai-card.green {
+    @apply border-cyber-green-300 bg-gradient-to-br from-cyber-green-50 to-white;
   }
   
-  .ai-card.matrix:hover {
-    @apply shadow-matrix-glow;
+  .ai-card.green:hover {
+    @apply shadow-green-glow;
   }
   
   .ai-button {
@@ -515,12 +515,12 @@
     @apply shadow-neural-glow;
   }
   
-  .ai-button.matrix {
-    @apply bg-gradient-matrix text-white shadow-lg;
+  .ai-button.green {
+    @apply bg-gradient-green text-white shadow-lg;
   }
   
-  .ai-button.matrix:hover {
-    @apply shadow-matrix-glow;
+  .ai-button.green:hover {
+    @apply shadow-green-glow;
   }
   
   .ai-input {
@@ -537,9 +537,9 @@
     --tw-ring-color: hsla(217, 91%, 60%, 0.2);
   }
   
-  .ai-input.matrix {
-    @apply border-matrix-orange-200 focus:border-matrix-orange-500;
-    --tw-ring-color: hsla(38, 92%, 50%, 0.2);
+  .ai-input.green {
+    @apply border-cyber-green-200 focus:border-cyber-green-500;
+    --tw-ring-color: hsla(162, 73%, 46%, 0.2);
   }
 }
 

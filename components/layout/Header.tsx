@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bell, Settings, LogOut, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Bell, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,11 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 interface HeaderProps {
-  onToggleSidebar: () => void
-  sidebarCollapsed: boolean
+  // Removed collapse-related props
 }
 
-export function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProps) {
+export function Header({}: HeaderProps) {
   const { user, logout } = useAuth()
 
   const handleLogout = async () => {
@@ -24,30 +23,8 @@ export function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleSidebar}
-            className="p-2"
-            title={sidebarCollapsed ? "Expand sidebar (Alt+S)" : "Collapse sidebar (Alt+S)"}
-          >
-            {sidebarCollapsed ? (
-              <PanelLeftOpen className="h-4 w-4" />
-            ) : (
-              <PanelLeftClose className="h-4 w-4" />
-            )}
-          </Button>
-          
-          <nav className="flex items-center space-x-2 text-sm text-gray-500">
-            <span>ShoreAgents Dashboard</span>
-            <span>-</span>
-            <span>Nurse Portal</span>
-          </nav>
-        </div>
-
+    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center h-16">
+            <div className="flex items-center justify-end w-full">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm">
             <Bell className="h-5 w-5" />

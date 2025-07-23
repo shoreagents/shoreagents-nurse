@@ -102,5 +102,5 @@ app.on('before-quit', () => {
 
 // Handle protocol for production
 if (!isDev) {
-  app.setAsDefaultProtocolClient('shoreagents-nurse-app');
+  app.setAsDefaultProtocolClient('shoreagents-clinic-dashboard');
 } 

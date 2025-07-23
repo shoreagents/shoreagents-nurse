@@ -112,7 +112,7 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'About ShoreAgents Nurse App',
+        label: 'About ShoreAgents Clinic Dashboard',
         click: async () => {
           await shell.openExternal('https://github.com/shoreagents/nurse-app');
         }

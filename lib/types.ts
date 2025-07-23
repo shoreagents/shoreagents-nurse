@@ -38,39 +38,50 @@ export interface SupplyItem {
   quantity: number
 }
 
+// Database enums
+export type ItemTypeMedical = 'medicine' | 'supply'
+
+// Category and Supplier types
+export interface MedicalCategory {
+  id: number
+  item_type: ItemTypeMedical
+  name: string
+}
+
+export interface MedicalSupplier {
+  id: number
+  name: string
+}
+
 // Inventory management types
 export interface InventoryMedicine {
-  id: string
+  id: number
+  item_type: ItemTypeMedical
   name: string
-  displayName: string
   description?: string
-  category: string
+  category_id?: number
   stock: number
-  unit: string
-  reorderLevel: number
+  reorder_level: number
   price?: number
-  expiryDate?: Date
-  supplier?: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
+  supplier_id?: number
+  // Joined fields for display
+  category_name?: string
+  supplier_name?: string
 }
 
 export interface InventorySupply {
-  id: string
+  id: number
+  item_type: ItemTypeMedical
   name: string
-  displayName: string
   description?: string
-  category: string
+  category_id?: number
   stock: number
-  unit: string
-  reorderLevel: number
+  reorder_level: number
   price?: number
-  expiryDate?: Date
-  supplier?: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
+  supplier_id?: number
+  // Joined fields for display
+  category_name?: string
+  supplier_name?: string
 }
 
 export interface InventoryTransaction {

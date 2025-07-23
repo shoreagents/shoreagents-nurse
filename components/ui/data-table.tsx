@@ -21,6 +21,47 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import * as SelectPrimitive from "@radix-ui/react-select"
+import { Skeleton } from '@/components/ui/skeleton'
+import { CategoryManagementModal } from '@/components/ui/category-management-modal'
+import { SupplierManagementModal } from '@/components/ui/supplier-management-modal'
+import { SelectSeparator } from '@/components/ui/select'
+
+// Custom SelectContent without scroll arrows - same as forms
+const CustomSelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 max-h-[40vh] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1 max-h-[40vh] overflow-y-scroll",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgb(156 163 175) rgb(243 244 246)',
+          scrollbarGutter: 'stable'
+        }}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+))
+CustomSelectContent.displayName = "CustomSelectContent"
 
 export interface DataTableColumn<T> {
   key: keyof T
@@ -49,6 +90,8 @@ export interface DataTableProps<T> {
   onExport?: () => void
   emptyMessage?: string
   className?: string
+  customActions?: React.ReactNode
+  type?: 'medicine' | 'supply' // Add type prop to determine category type
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -61,7 +104,9 @@ export function DataTable<T extends Record<string, any>>({
   onRefresh,
   onExport,
   emptyMessage = 'No data found',
-  className
+  className,
+  customActions,
+  type
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
@@ -139,7 +184,7 @@ export function DataTable<T extends Record<string, any>>({
       if (current?.key === key) {
         return current.direction === 'asc' 
           ? { key, direction: 'desc' }
-          : null
+          : { key, direction: 'asc' }
       }
       return { key, direction: 'asc' }
     })
@@ -173,48 +218,37 @@ export function DataTable<T extends Record<string, any>>({
     if (sortConfig?.key === key) {
       return sortConfig.direction === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />
     }
-    return <ArrowUpDown className="w-4 h-4" />
+    return <ArrowUp className="w-4 h-4 opacity-30" />
   }
 
   return (
     <div className={cn('space-y-4', className)}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          {title && <h2 className="text-2xl font-bold">{title}</h2>}
-          <p className="text-sm text-muted-foreground">
-            Showing {startItem} to {endItem} of {sortedData.length} entries
-          </p>
+      {(title || onExport || customActions) && (
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            {title && <h2 className="text-2xl font-bold">{title}</h2>}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {customActions}
+            {onExport && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExport}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            )}
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          {onRefresh && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={loading}
-            >
-              <RefreshCw className={cn('w-4 h-4 mr-2', loading && 'animate-spin')} />
-              Refresh
-            </Button>
-          )}
-          {onExport && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onExport}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Filters */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="p-3">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
@@ -237,23 +271,51 @@ export function DataTable<T extends Record<string, any>>({
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={filter.label} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All {filter.label}</SelectItem>
+                <CustomSelectContent>
+                  <SelectItem 
+                    value="__all__" 
+                  >
+                    All {filter.label === 'Category' ? 'Categories' : filter.label === 'Supplier' ? 'Suppliers' : filter.label}
+                  </SelectItem>
                   {filter.options.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
                   ))}
-                </SelectContent>
+                  {filter.key === 'category_name' && (
+                    <>
+                      <SelectSeparator className="my-2" />
+                      <div className="px-2 py-1.5">
+                        <CategoryManagementModal
+                          type={type === 'medicine' ? 'medicine' : 'supply'}
+                          onCategoriesChange={onRefresh || (() => {})}
+                          trigger={
+                            <button className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground rounded-sm relative">
+                              Manage Categories
+                            </button>
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
+                  {filter.key === 'supplier_name' && (
+                    <>
+                      <SelectSeparator className="my-2" />
+                      <div className="px-2 py-1.5">
+                        <SupplierManagementModal
+                          onSuppliersChange={onRefresh || (() => {})}
+                          trigger={
+                            <button className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground rounded-sm relative">
+                              Manage Suppliers
+                            </button>
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
+                </CustomSelectContent>
               </Select>
             ))}
-
-            {/* Clear Filters */}
-            {(searchTerm || Object.values(activeFilters).some(Boolean)) && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                Clear Filters
-              </Button>
-            )}
           </div>
         </CardHeader>
       </Card>
@@ -291,12 +353,19 @@ export function DataTable<T extends Record<string, any>>({
               
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="text-center py-8">
-                      <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
-                      Loading...
-                    </TableCell>
-                  </TableRow>
+                  // Skeleton rows for loading state
+                  Array.from({ length: itemsPerPage }).map((_, index) => (
+                    <TableRow key={index}>
+                      {columns.map(column => (
+                        <TableCell key={column.key as string} className={cn(
+                          column.align === 'center' && 'text-center',
+                          column.align === 'right' && 'text-right'
+                        )}>
+                          <Skeleton className="h-4 w-full" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
                 ) : paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={columns.length} className="text-center py-8 text-muted-foreground">
@@ -330,30 +399,14 @@ export function DataTable<T extends Record<string, any>>({
       </Card>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Rows per page:</span>
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(value) => {
-                setItemsPerPage(parseInt(value))
-                setCurrentPage(1)
-              }}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Showing {startItem} to {endItem} of {sortedData.length} entries
+          </p>
+        </div>
 
+        {totalPages > 1 && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -393,8 +446,8 @@ export function DataTable<T extends Record<string, any>>({
               <ChevronsRight className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 } 

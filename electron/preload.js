@@ -46,5 +46,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 // DOM content loaded event
 window.addEventListener('DOMContentLoaded', () => {
-  console.log('ShoreAgents Nurse App - Preload script loaded');
+  console.log('ShoreAgents Clinic Dashboard - Preload script loaded');
 }); 

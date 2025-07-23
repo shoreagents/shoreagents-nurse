@@ -1,6 +1,6 @@
 # Building Portable .exe for Distribution
 
-This guide explains how to create a portable .exe file for the ShoreAgents Nurse Application.
+This guide explains how to create a portable .exe file for the ShoreAgents Clinic Dashboard.
 
 ## Prerequisites
 
@@ -39,8 +39,8 @@ npm run build:portable
 After successful build, you'll find:
 
 - **📁 `dist/`** - Contains all build outputs
-- **📄 `ShoreAgents Nurse App-1.0.0-portable.exe`** - Your portable executable
-- **📄 `ShoreAgents Nurse App Setup 1.0.0.exe`** - Installer version (if built with build:all)
+- **📄 `ShoreAgents Clinic Dashboard-1.0.0-portable.exe`** - Your portable executable
+- **📄 `ShoreAgents Clinic Dashboard Setup 1.0.0.exe`** - Installer version (if built with build:all)
 
 ## Portable .exe Features
 

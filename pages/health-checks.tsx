@@ -151,331 +151,342 @@ const HealthChecks = React.memo(() => {
 
   if (loading) {
     return (
-      <PageWrapper title="Health Checks">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="bg-gray-50 min-h-0 flex-1 flex flex-col">
+        <div className="flex-1 p-6 overflow-auto">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
         </div>
-      </PageWrapper>
+      </div>
     )
   }
 
   return (
-    <PageWrapper 
-      title="Agent Health Checks" 
-      description="Manage health check requests from agents"
-    >
-      <div className="space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">{pendingRequests.length}</p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Notified</p>
-                  <p className="text-2xl font-bold text-blue-600">{notifiedRequests.length}</p>
-                </div>
-                <Bell className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">In Clinic</p>
-                  <p className="text-2xl font-bold text-green-600">{inClinicRequests.length}</p>
-                </div>
-                <UserCheck className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold text-gray-600">{completedRequests.length}</p>
-                </div>
-                <CheckCircle2 className="h-8 w-8 text-gray-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+    <div className="bg-gray-50 min-h-0 flex-1 flex flex-col">
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Agent Health Checks</h2>
+              <p className="text-muted-foreground">
+                Manage health check requests from agents
+              </p>
+            </div>
+          </div>
 
-        {/* Pending Requests */}
-        {pendingRequests.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-yellow-600" />
-                Pending Health Check Requests
-              </CardTitle>
-              <CardDescription>
-                New requests waiting for notification
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pendingRequests.map((request) => (
-                  <div 
-                    key={request.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50 border-yellow-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(request.status)}
-                        {getStatusBadge(request.status)}
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                    <p className="text-2xl font-bold text-yellow-600">{pendingRequests.length}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-yellow-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Notified</p>
+                    <p className="text-2xl font-bold text-blue-600">{notifiedRequests.length}</p>
+                  </div>
+                  <Bell className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">In Clinic</p>
+                    <p className="text-2xl font-bold text-green-600">{inClinicRequests.length}</p>
+                  </div>
+                  <UserCheck className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                    <p className="text-2xl font-bold text-gray-600">{completedRequests.length}</p>
+                  </div>
+                  <CheckCircle2 className="h-8 w-8 text-gray-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Pending Requests */}
+          {pendingRequests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-yellow-600" />
+                  Pending Health Check Requests
+                </CardTitle>
+                <CardDescription>
+                  New requests waiting for notification
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingRequests.map((request) => (
+                    <div 
+                      key={request.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50 border-yellow-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(request.status)}
+                          {getStatusBadge(request.status)}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium">{request.agentName}</p>
+                                                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                             <div className="flex items-center gap-1">
+                               <Building2 className="h-3 w-3" />
+                               {request.client}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Hash className="h-3 w-3" />
+                               {request.employeeId}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Calendar className="h-3 w-3" />
+                               {new Date(request.requestDate).toLocaleDateString()}
+                             </div>
+                           </div>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <p className="font-medium">{request.agentName}</p>
-                                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                           <div className="flex items-center gap-1">
-                             <Building2 className="h-3 w-3" />
-                             {request.client}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Hash className="h-3 w-3" />
-                             {request.employeeId}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Calendar className="h-3 w-3" />
-                             {new Date(request.requestDate).toLocaleDateString()}
-                           </div>
-                         </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full">
+                          📞 Notify agent to come to clinic
+                        </div>
+                        <Button 
+                          onClick={() => handleNotifyAgent(request)}
+                          size="sm"
+                          className="bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          <Bell className="h-4 w-4 mr-2" />
+                          Notify Agent
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full">
-                        📞 Notify agent to come to clinic
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Notified Requests */}
+          {notifiedRequests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-blue-600" />
+                  Notified Agents
+                </CardTitle>
+                <CardDescription>
+                  Agents who have been notified and are expected to arrive
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {notifiedRequests.map((request) => (
+                    <div 
+                      key={request.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 border-blue-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(request.status)}
+                          {getStatusBadge(request.status)}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium">{request.agentName}</p>
+                                                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                             <div className="flex items-center gap-1">
+                               <Building2 className="h-3 w-3" />
+                               {request.client}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Hash className="h-3 w-3" />
+                               {request.employeeId}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Calendar className="h-3 w-3" />
+                               Notified: {request.notifiedAt ? new Date(request.notifiedAt).toLocaleString() : 'N/A'}
+                             </div>
+                           </div>
+                        </div>
                       </div>
                       <Button 
-                        onClick={() => handleNotifyAgent(request)}
+                        onClick={() => handleAgentInClinic(request)}
                         size="sm"
-                        className="bg-yellow-600 hover:bg-yellow-700"
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <Bell className="h-4 w-4 mr-2" />
-                        Notify Agent
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Agent {request.agentName} is in clinic
                       </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Notified Requests */}
-        {notifiedRequests.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-600" />
-                Notified Agents
-              </CardTitle>
-              <CardDescription>
-                Agents who have been notified and are expected to arrive
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {notifiedRequests.map((request) => (
-                  <div 
-                    key={request.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 border-blue-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(request.status)}
-                        {getStatusBadge(request.status)}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium">{request.agentName}</p>
-                                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                           <div className="flex items-center gap-1">
-                             <Building2 className="h-3 w-3" />
-                             {request.client}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Hash className="h-3 w-3" />
-                             {request.employeeId}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Calendar className="h-3 w-3" />
-                             Notified: {request.notifiedAt ? new Date(request.notifiedAt).toLocaleString() : 'N/A'}
-                           </div>
-                         </div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => handleAgentInClinic(request)}
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <UserCheck className="h-4 w-4 mr-2" />
-                      Agent {request.agentName} is in clinic
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* In Clinic Requests */}
-        {inClinicRequests.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-green-600" />
-                Agents in Clinic
-              </CardTitle>
-              <CardDescription>
-                Agents currently in the clinic for health checks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {inClinicRequests.map((request) => (
-                  <div 
-                    key={request.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(request.status)}
-                        {getStatusBadge(request.status)}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium">{request.agentName}</p>
-                                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                           <div className="flex items-center gap-1">
-                             <Building2 className="h-3 w-3" />
-                             {request.client}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Hash className="h-3 w-3" />
-                             {request.employeeId}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Calendar className="h-3 w-3" />
-                             Arrived: {request.arrivedAt ? new Date(request.arrivedAt).toLocaleString() : 'N/A'}
-                           </div>
-                           {request.nurseName && (
-                             <div className="flex items-center gap-1">
-                               <Users className="h-3 w-3" />
-                               Nurse: {request.nurseName}
-                             </div>
-                           )}
-                         </div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => handleHealthCheckCompleted(request)}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Health Check Completed
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Completed Requests */}
-        {completedRequests.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-gray-600" />
-                Completed Health Checks
-              </CardTitle>
-              <CardDescription>
-                Recently completed health check sessions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {completedRequests.slice(0, 5).map((request) => (
-                  <div 
-                    key={request.id} 
-                    className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(request.status)}
-                        {getStatusBadge(request.status)}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium">{request.agentName}</p>
-                                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                           <div className="flex items-center gap-1">
-                             <Building2 className="h-3 w-3" />
-                             {request.client}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Hash className="h-3 w-3" />
-                             {request.employeeId}
-                           </div>
-                           <div className="flex items-center gap-1">
-                             <Calendar className="h-3 w-3" />
-                             Completed: {request.completedAt ? new Date(request.completedAt).toLocaleString() : 'N/A'}
-                           </div>
-                           {request.nurseName && (
-                             <div className="flex items-center gap-1">
-                               <Users className="h-3 w-3" />
-                               By: {request.nurseName}
-                             </div>
-                           )}
-                         </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {completedRequests.length > 5 && (
-                  <p className="text-sm text-muted-foreground text-center py-2">
-                    And {completedRequests.length - 5} more completed health checks...
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Empty State */}
-        {healthChecks.length === 0 && (
-          <Card>
-            <CardContent className="py-12">
-              <div className="text-center space-y-4">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto" />
-                <div>
-                  <h3 className="text-lg font-semibold">No Health Check Requests</h3>
-                  <p className="text-muted-foreground">
-                    When agents request health checks, they will appear here.
-                  </p>
+                  ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* In Clinic Requests */}
+          {inClinicRequests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCheck className="h-5 w-5 text-green-600" />
+                  Agents in Clinic
+                </CardTitle>
+                <CardDescription>
+                  Agents currently in the clinic for health checks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {inClinicRequests.map((request) => (
+                    <div 
+                      key={request.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(request.status)}
+                          {getStatusBadge(request.status)}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium">{request.agentName}</p>
+                                                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                             <div className="flex items-center gap-1">
+                               <Building2 className="h-3 w-3" />
+                               {request.client}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Hash className="h-3 w-3" />
+                               {request.employeeId}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Calendar className="h-3 w-3" />
+                               Arrived: {request.arrivedAt ? new Date(request.arrivedAt).toLocaleString() : 'N/A'}
+                             </div>
+                             {request.nurseName && (
+                               <div className="flex items-center gap-1">
+                                 <Users className="h-3 w-3" />
+                                 Nurse: {request.nurseName}
+                               </div>
+                             )}
+                           </div>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => handleHealthCheckCompleted(request)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Health Check Completed
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Completed Requests */}
+          {completedRequests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-gray-600" />
+                  Completed Health Checks
+                </CardTitle>
+                <CardDescription>
+                  Recently completed health check sessions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {completedRequests.slice(0, 5).map((request) => (
+                    <div 
+                      key={request.id} 
+                      className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(request.status)}
+                          {getStatusBadge(request.status)}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium">{request.agentName}</p>
+                                                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                             <div className="flex items-center gap-1">
+                               <Building2 className="h-3 w-3" />
+                               {request.client}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Hash className="h-3 w-3" />
+                               {request.employeeId}
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Calendar className="h-3 w-3" />
+                               Completed: {request.completedAt ? new Date(request.completedAt).toLocaleString() : 'N/A'}
+                             </div>
+                             {request.nurseName && (
+                               <div className="flex items-center gap-1">
+                                 <Users className="h-3 w-3" />
+                                 By: {request.nurseName}
+                               </div>
+                             )}
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {completedRequests.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      And {completedRequests.length - 5} more completed health checks...
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Empty State */}
+          {healthChecks.length === 0 && (
+            <Card>
+              <CardContent className="py-12">
+                <div className="text-center space-y-4">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-semibold">No Health Check Requests</h3>
+                    <p className="text-muted-foreground">
+                      When agents request health checks, they will appear here.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
-    </PageWrapper>
+    </div>
   )
 })
 

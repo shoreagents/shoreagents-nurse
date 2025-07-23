@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { 
@@ -14,14 +14,16 @@ import {
   Warehouse,
   Users,
   Activity,
-  Heart
+  Heart,
+  Pill
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
 import { cn } from '@/lib/utils'
+import { SyringeIcon, FlaskIcon, FileStackIcon, BoxesIcon, PillAnimated, FoldersIcon, FileCheck2Icon, LayoutPanelTopIcon, MonitorCheckIcon, GripIcon, CircleDollarSignIcon, ThermometerIcon, ActivityIcon } from '@/components/icons'
 
 interface SidebarProps {
-  collapsed?: boolean
+  // Removed collapsed prop
 }
 
 interface NavigationItem {
@@ -49,14 +51,7 @@ const navigationSections: NavigationSection[] = [
         id: 'dashboard',
         label: 'Dashboard',
         href: '/',
-        icon: Home,
-        requiredPermission: permissions.canViewDashboard
-      },
-      {
-        id: 'recent-activities',
-        label: 'Recent Activities',
-        href: '/recent-activities',
-        icon: Activity,
+        icon: GripIcon,
         requiredPermission: permissions.canViewDashboard
       }
     ]
@@ -70,7 +65,7 @@ const navigationSections: NavigationSection[] = [
         id: 'health-checks',
         label: 'Health Checks',
         href: '/health-checks',
-        icon: Heart,
+        icon: ActivityIcon,
         requiredPermission: permissions.canViewClinicLogs
       }
     ]
@@ -84,14 +79,14 @@ const navigationSections: NavigationSection[] = [
         id: 'clinic-log-form',
         label: 'New Clinic Log',
         href: '/clinic-log-form',
-        icon: FileText,
+        icon: MonitorCheckIcon,
         requiredPermission: permissions.canCreateClinicLog
       },
       {
         id: 'reimbursement-form',
         label: 'New Reimbursement',
         href: '/reimbursement-form',
-        icon: Banknote,
+        icon: CircleDollarSignIcon,
         requiredPermission: permissions.canCreateReimbursement
       }
     ]
@@ -105,14 +100,14 @@ const navigationSections: NavigationSection[] = [
         id: 'clinic-records',
         label: 'Clinic Records',
         href: '/clinic-records',
-        icon: Package,
+        icon: FoldersIcon,
         requiredPermission: permissions.canViewClinicLogs
       },
       {
         id: 'reimbursement-records',
         label: 'Reimbursement Records',
         href: '/reimbursement-records',
-        icon: Receipt,
+        icon: FileCheck2Icon,
         requiredPermission: permissions.canViewReimbursements
       }
     ]
@@ -123,10 +118,17 @@ const navigationSections: NavigationSection[] = [
     icon: Warehouse,
     items: [
       {
-        id: 'inventory-management',
-        label: 'Inventory Management',
-        href: '/inventory',
-        icon: Package,
+        id: 'medicines',
+        label: 'Medicines',
+        href: '/medicines',
+        icon: PillAnimated,
+        requiredPermission: permissions.canViewInventory
+      },
+      {
+        id: 'supplies',
+        label: 'Supplies',
+        href: '/supplies',
+        icon: ThermometerIcon,
         requiredPermission: permissions.canViewInventory
       }
     ]
@@ -147,9 +149,10 @@ const navigationSections: NavigationSection[] = [
   }
 ]
 
-const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: SidebarProps) {
+const SidebarComponent = React.memo(function Sidebar({}: SidebarProps) {
   const router = useRouter()
   const { user } = useAuth()
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   const filteredSections = React.useMemo(() => {
     return navigationSections.map(section => ({
@@ -162,22 +165,17 @@ const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: Side
   }, [user])
 
   return (
-    <div className={cn(
-      "bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out",
-      collapsed ? "w-16" : "w-64"
-    )}>
+    <div className="bg-white border-r border-gray-200 flex flex-col h-full w-64 overflow-x-hidden">
       {/* Logo/Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200 flex items-center h-16">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">SA</span>
           </div>
-          {!collapsed && (
-            <div>
-              <h1 className="font-semibold text-gray-900">ShoreAgents</h1>
-              <p className="text-xs text-gray-500">Nurse</p>
-            </div>
-          )}
+          <div className="flex flex-col items-start">
+            <h1 className="font-semibold text-gray-900">ShoreAgents</h1>
+            <p className="text-xs text-gray-500">Clinic Dashboard</p>
+          </div>
         </div>
       </div>
 
@@ -186,12 +184,9 @@ const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: Side
         <div className="space-y-6">
           {filteredSections.map((section) => (
             <div key={section.id}>
-              {!collapsed && (
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <section.icon className="w-3 h-3" />
-                  {section.label}
-                </div>
-              )}
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+                {section.label}
+              </div>
               
               <div className="space-y-1">
                 {section.items.map((item) => {
@@ -203,18 +198,67 @@ const SidebarComponent = React.memo(function Sidebar({ collapsed = false }: Side
                       key={item.id} 
                       href={item.href} 
                       prefetch={true}
+                      onMouseEnter={() => setHoveredItem(item.id)}
+                      onMouseLeave={() => setHoveredItem(null)}
                       className={cn(
-                        "flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
-                        "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                        collapsed ? "justify-center" : "justify-start",
-                        isActive && "bg-gray-100 text-gray-900 font-semibold"
+                        "group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
+                        "text-gray-700 justify-start",
+                        !isActive && "hover:bg-gray-100 hover:text-gray-900",
+                        isActive && "bg-green-100 text-green-900"
                       )}
-                      title={collapsed ? item.label : undefined}
                     >
-                      <Icon className={cn("h-4 w-4 flex-shrink-0", !collapsed && "mr-3")} />
-                      {!collapsed && (
-                        <span className="truncate">{item.label}</span>
+                      {Icon === ThermometerIcon ? (
+                        <ThermometerIcon 
+                          className="h-6 w-6 flex-shrink-0 mr-3" 
+                          size={24}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === PillAnimated ? (
+                        <PillAnimated 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === FoldersIcon ? (
+                        <FoldersIcon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === FileCheck2Icon ? (
+                        <FileCheck2Icon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === GripIcon ? (
+                        <GripIcon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === MonitorCheckIcon ? (
+                        <MonitorCheckIcon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === CircleDollarSignIcon ? (
+                        <CircleDollarSignIcon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : Icon === ActivityIcon ? (
+                        <ActivityIcon 
+                          className="h-5 w-5 flex-shrink-0 mr-3" 
+                          size={20}
+                          animate={hoveredItem === item.id}
+                        />
+                      ) : (
+                        <Icon className="h-5 w-5 flex-shrink-0 mr-3" />
                       )}
+                      <span className="truncate">{item.label}</span>
                     </Link>
                   )
                 })}
