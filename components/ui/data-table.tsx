@@ -91,7 +91,8 @@ export interface DataTableProps<T> {
   emptyMessage?: string
   className?: string
   customActions?: React.ReactNode
-  type?: 'medicine' | 'supply' // Add type prop to determine category type
+  type?: 'Medicine' | 'Supply' // Add type prop to determine category type
+  onRowClick?: (item: T) => void // Add row click handler
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -106,7 +107,8 @@ export function DataTable<T extends Record<string, any>>({
   emptyMessage = 'No data found',
   className,
   customActions,
-  type
+  type,
+  onRowClick
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
@@ -141,6 +143,11 @@ export function DataTable<T extends Record<string, any>>({
               )
             }
             return false
+          }
+          
+          // Special handling for "Not Assigned" filter
+          if (value === 'Not Assigned') {
+            return !itemValue || itemValue === 'null' || itemValue === null || itemValue === undefined
           }
           
           // Default string comparison for other fields
@@ -287,7 +294,7 @@ export function DataTable<T extends Record<string, any>>({
                       <SelectSeparator className="my-2" />
                       <div className="px-2 py-1.5">
                         <CategoryManagementModal
-                          type={type === 'medicine' ? 'medicine' : 'supply'}
+                          type={type === 'Medicine' ? 'Medicine' : 'Supply'}
                           onCategoriesChange={onRefresh || (() => {})}
                           trigger={
                             <button className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground rounded-sm relative">
@@ -374,7 +381,14 @@ export function DataTable<T extends Record<string, any>>({
                   </TableRow>
                 ) : (
                   paginatedData.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-muted/50">
+                    <TableRow 
+                      key={index} 
+                      className={cn(
+                        "hover:bg-muted/50 transition-colors",
+                        onRowClick && "cursor-pointer"
+                      )}
+                      onClick={() => onRowClick?.(item)}
+                    >
                       {columns.map(column => (
                         <TableCell
                           key={column.key as string}

@@ -173,44 +173,40 @@ export const supplierDb = {
 export const medicineDb = {
   async getAll(): Promise<InventoryMedicine[]> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.item_type = 'medicine'
+      WHERE m.item_type = 'Medicine'
       ORDER BY m.name ASC
     `)
     
     return result.rows.map(row => ({
       id: row.id,
-      item_type: 'medicine',
+      item_type: 'Medicine',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }))
   },
 
   async getById(id: number): Promise<InventoryMedicine | null> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.id = $1 AND m.item_type = 'medicine'
+      WHERE m.id = $1 AND m.item_type = 'Medicine'
     `, [id])
     
     if (result.rows.length === 0) return null
@@ -218,28 +214,27 @@ export const medicineDb = {
     const row = result.rows[0]
     return {
       id: row.id,
-      item_type: 'medicine',
+      item_type: 'Medicine',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }
   },
 
   async save(medicine: Partial<InventoryMedicine>): Promise<InventoryMedicine> {
     if (medicine.id) {
-      // Update existing
+      // Update existing medicine
       const result = await query(`
         UPDATE inventory_medical 
-        SET name = $1, description = $2, category_id = $3, stock = $4,
-            reorder_level = $5, price = $6, supplier_id = $7,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = $8 AND item_type = 'medicine'
+        SET name = $1, description = $2, category_id = $3, stock = $4, 
+            reorder_level = $5, price = $6, supplier_id = $7, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $8 AND item_type = 'Medicine'
         RETURNING id
       `, [
         medicine.name,
@@ -254,10 +249,10 @@ export const medicineDb = {
       
       return this.getById(result.rows[0].id) as Promise<InventoryMedicine>
     } else {
-      // Create new
+      // Insert new medicine
       const result = await query(`
         INSERT INTO inventory_medical (item_type, name, description, category_id, stock, reorder_level, price, supplier_id)
-        VALUES ('medicine', $1, $2, $3, $4, $5, $6, $7)
+        VALUES ('Medicine', $1, $2, $3, $4, $5, $6, $7)
         RETURNING id
       `, [
         medicine.name,
@@ -276,37 +271,39 @@ export const medicineDb = {
   async delete(id: number): Promise<void> {
     await query(`
       DELETE FROM inventory_medical 
-      WHERE id = $1 AND item_type = 'medicine'
+      WHERE id = $1 AND item_type = 'Medicine'
     `, [id])
   },
 
   async search(searchTerm: string): Promise<InventoryMedicine[]> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.item_type = 'medicine' 
-        AND (m.name ILIKE $1 OR m.description ILIKE $1 OR c.name ILIKE $1 OR s.name ILIKE $1)
+      WHERE m.item_type = 'Medicine' AND (
+        m.name ILIKE $1 OR 
+        m.description ILIKE $1 OR
+        c.name ILIKE $1 OR
+        s.name ILIKE $1
+      )
       ORDER BY m.name ASC
     `, [`%${searchTerm}%`])
     
     return result.rows.map(row => ({
       id: row.id,
-      item_type: 'medicine',
+      item_type: 'Medicine',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }))
   }
 }
@@ -315,44 +312,40 @@ export const medicineDb = {
 export const supplyDb = {
   async getAll(): Promise<InventorySupply[]> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.item_type = 'supply'
+      WHERE m.item_type = 'Supply'
       ORDER BY m.name ASC
     `)
     
     return result.rows.map(row => ({
       id: row.id,
-      item_type: 'supply',
+      item_type: 'Supply',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }))
   },
 
   async getById(id: number): Promise<InventorySupply | null> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.id = $1 AND m.item_type = 'supply'
+      WHERE m.id = $1 AND m.item_type = 'Supply'
     `, [id])
     
     if (result.rows.length === 0) return null
@@ -360,28 +353,27 @@ export const supplyDb = {
     const row = result.rows[0]
     return {
       id: row.id,
-      item_type: 'supply',
+      item_type: 'Supply',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }
   },
 
   async save(supply: Partial<InventorySupply>): Promise<InventorySupply> {
     if (supply.id) {
-      // Update existing
+      // Update existing supply
       const result = await query(`
         UPDATE inventory_medical 
-        SET name = $1, description = $2, category_id = $3, stock = $4,
-            reorder_level = $5, price = $6, supplier_id = $7,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = $8 AND item_type = 'supply'
+        SET name = $1, description = $2, category_id = $3, stock = $4, 
+            reorder_level = $5, price = $6, supplier_id = $7, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $8 AND item_type = 'Supply'
         RETURNING id
       `, [
         supply.name,
@@ -396,10 +388,10 @@ export const supplyDb = {
       
       return this.getById(result.rows[0].id) as Promise<InventorySupply>
     } else {
-      // Create new
+      // Insert new supply
       const result = await query(`
         INSERT INTO inventory_medical (item_type, name, description, category_id, stock, reorder_level, price, supplier_id)
-        VALUES ('supply', $1, $2, $3, $4, $5, $6, $7)
+        VALUES ('Supply', $1, $2, $3, $4, $5, $6, $7)
         RETURNING id
       `, [
         supply.name,
@@ -418,37 +410,39 @@ export const supplyDb = {
   async delete(id: number): Promise<void> {
     await query(`
       DELETE FROM inventory_medical 
-      WHERE id = $1 AND item_type = 'supply'
+      WHERE id = $1 AND item_type = 'Supply'
     `, [id])
   },
 
   async search(searchTerm: string): Promise<InventorySupply[]> {
     const result = await query(`
-      SELECT 
-        m.id, m.name, m.description, m.category_id, m.stock, 
-        m.reorder_level, m.price, m.supplier_id,
-        c.name as category_name,
-        s.name as supplier_name
+      SELECT m.*, 
+             c.name as category_name,
+             s.name as supplier_name
       FROM inventory_medical m
       LEFT JOIN inventory_medical_categories c ON m.category_id = c.id
       LEFT JOIN inventory_medical_suppliers s ON m.supplier_id = s.id
-      WHERE m.item_type = 'supply' 
-        AND (m.name ILIKE $1 OR m.description ILIKE $1 OR c.name ILIKE $1 OR s.name ILIKE $1)
+      WHERE m.item_type = 'Supply' AND (
+        m.name ILIKE $1 OR 
+        m.description ILIKE $1 OR
+        c.name ILIKE $1 OR
+        s.name ILIKE $1
+      )
       ORDER BY m.name ASC
     `, [`%${searchTerm}%`])
     
     return result.rows.map(row => ({
       id: row.id,
-      item_type: 'supply',
+      item_type: 'Supply',
       name: row.name,
       description: row.description,
       category_id: row.category_id,
       stock: row.stock,
       reorder_level: row.reorder_level,
-      price: row.price ? parseFloat(row.price) : undefined,
+      price: row.price ? Number(row.price) : undefined,
       supplier_id: row.supplier_id,
-      category_name: row.category_name,
-      supplier_name: row.supplier_name
+      category_name: (row.category_name && row.category_name !== 'null') ? row.category_name : null,
+      supplier_name: (row.supplier_name && row.supplier_name !== 'null') ? row.supplier_name : null
     }))
   }
 }
