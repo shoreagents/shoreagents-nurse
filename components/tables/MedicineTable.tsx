@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { inventoryMedicineStorage } from '../../lib/storage'
@@ -10,8 +10,8 @@ import { showSuccessToast, showErrorToast, showItemDeletedToast } from '@/lib/to
 import { DataTable, DataTableColumn, DataTableFilter } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { AlertTriangle, Package, Edit, Trash2, Eye, MoreHorizontal, Plus, Download } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { AlertTriangle, Package, Edit, Trash2, Eye, MoreHorizontal, Plus, Download, Pill } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Label } from '@/components/ui/label'
 import { InventoryMedicineForm } from '@/components/forms/InventoryMedicineForm'
@@ -19,9 +19,10 @@ import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface MedicineTableProps {
   className?: string
+  autoOpenForm?: boolean
 }
 
-const MedicineTable = React.memo(function MedicineTable({ className }: MedicineTableProps) {
+const MedicineTable = React.memo(function MedicineTable({ className, autoOpenForm }: MedicineTableProps) {
   const { user } = useAuth()
   const { toast } = useToast()
   
@@ -34,6 +35,8 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
   // Dialog states
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [viewingItem, setViewingItem] = useState<InventoryMedicine | null>(null)
+  const [editingItem, setEditingItem] = useState<InventoryMedicine | null>(null)
+  const [formDialogOpen, setFormDialogOpen] = useState(false)
 
   // Load data
   useEffect(() => {
@@ -41,7 +44,7 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
       try {
         const [medicineData, categoriesData, suppliersData] = await Promise.all([
           inventoryMedicineStorage.getAll(),
-          fetch('/api/inventory/categories?type=medicine').then(res => res.json()),
+          fetch('/api/inventory/categories?type=Medicine').then(res => res.json()),
           fetch('/api/inventory/suppliers').then(res => res.json())
         ])
         
@@ -62,6 +65,13 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
 
     loadData()
   }, [toast])
+
+  // Auto open form if requested
+  useEffect(() => {
+    if (autoOpenForm && !loading) {
+      setFormDialogOpen(true)
+    }
+  }, [autoOpenForm, loading])
 
   // Refresh handler
   const handleRefreshMedicines = async () => {
@@ -152,6 +162,11 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
     setViewDialogOpen(true)
   }
 
+  const handleEdit = (item: InventoryMedicine) => {
+    setEditingItem(item)
+    setFormDialogOpen(true)
+  }
+
   // Delete handler
   const handleDeleteMedicine = async (id: number) => {
     try {
@@ -179,7 +194,9 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
       header: 'Name',
       sortable: true,
       render: (value) => (
-        <div className="font-medium">{String(value)}</div>
+        <div className="font-medium">
+          {String(value)}
+        </div>
       )
     },
     {
@@ -187,7 +204,9 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
       header: 'Category',
       sortable: true,
       render: (value) => (
-        <Badge variant="outline">{String(value) || 'No Category'}</Badge>
+        <div>
+          {value && value !== 'null' ? String(value) : 'Not Assigned'}
+        </div>
       )
     },
     {
@@ -203,98 +222,97 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
         </div>
       )
     },
-          {
-        key: 'reorder_level',
-        header: 'Status',
-        render: (value, record) => {
-          const stockStatus = getStockStatus(record.stock, record.reorder_level)
-          return <Badge variant={stockStatus.variant} className={stockStatus.className}>{stockStatus.status}</Badge>
-        }
-      },
+    {
+      key: 'reorder_level',
+      header: 'Status',
+      render: (value, record) => {
+        const stockStatus = getStockStatus(record.stock, record.reorder_level)
+        return <Badge variant={stockStatus.variant} className={stockStatus.className}>{stockStatus.status}</Badge>
+      }
+    },
+    {
+      key: 'price',
+      header: 'Price (Per Item)',
+      sortable: true,
+      render: (value) => (
+        <div>
+          {value ? `₱${Number(value).toFixed(2)}` : 'Not Set'}
+        </div>
+      )
+    },
     {
       key: 'supplier_name',
       header: 'Supplier',
       sortable: true,
-      render: (value) => String(value) || 'No Supplier'
-    },
-    {
-      key: 'price',
-      header: 'Price',
-      sortable: true,
       render: (value) => (
-        value ? `₱${Number(value).toFixed(2)}` : 'N/A'
+        <div>
+          {value && value !== 'null' ? String(value) : 'Not Assigned'}
+        </div>
       )
     },
-
     {
       key: 'id',
       header: 'Actions',
-      align: 'center',
-      render: (value, record) => (
+      render: (_, record) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="w-4 h-4" />
+            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleView(record)}>
-              <Eye className="w-4 h-4 mr-2" />
-              View
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleEdit(record)
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
             </DropdownMenuItem>
-            <InventoryMedicineForm
-              editingMedicine={record}
-              onSuccess={handleMedicineSuccess}
-              trigger={
-                <DropdownMenuItem 
-
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-              }
-            />
-            <DropdownMenuSeparator />
-            <DeleteConfirmationDialog
-              trigger={
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              }
-              itemName={record.name}
-              itemType="medicine"
-              onConfirm={() => handleDeleteMedicine(Number(value))}
-            />
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDeleteMedicine(record.id)
+              }}
+              className="text-red-600 hover:text-red-600 hover:bg-red-50 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
     }
-  ], [])
+  ], [handleDeleteMedicine])
 
   // Filters for medicines
   const medicineFilters: DataTableFilter[] = useMemo(() => [
     {
       key: 'category_name',
       label: 'Category',
-      options: categories
-        .filter(category => category.item_type === 'medicine')
-        .map(category => ({
-          value: category.name,
-          label: category.name
-        }))
+      options: [
+        { value: 'Not Assigned', label: 'Not Assigned' },
+        ...categories
+          .filter(category => category.item_type === 'Medicine')
+          .map(category => ({
+            value: category.name,
+            label: category.name
+          }))
+      ]
     },
     {
       key: 'supplier_name',
       label: 'Supplier',
-      options: suppliers.map(supplier => ({
-        value: supplier.name,
-        label: supplier.name
-      }))
+      options: [
+        { value: 'Not Assigned', label: 'Not Assigned' },
+        ...suppliers.map(supplier => ({
+          value: supplier.name,
+          label: supplier.name
+        }))
+      ]
     }
   ], [categories, suppliers])
 
@@ -343,59 +361,104 @@ const MedicineTable = React.memo(function MedicineTable({ className }: MedicineT
         loading={loading}
         onRefresh={handleRefreshMedicines}
         emptyMessage="No medicines found"
-        type="medicine"
+        type="Medicine"
+        onRowClick={handleView}
       />
 
       {/* View Item Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Medicine Details</DialogTitle>
+            <DialogTitle>
+              Medicine Details
+            </DialogTitle>
+            <DialogDescription>
+              View detailed information about this medicine item.
+            </DialogDescription>
           </DialogHeader>
           {viewingItem && (
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium">Name</Label>
-                <p className="text-sm">{viewingItem.name}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Category</Label>
-                <p className="text-sm">{viewingItem.category_name || 'No Category'}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Stock</Label>
-                  <p className="text-sm">{viewingItem.stock} units</p>
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Name</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <p className="text-sm font-medium">{viewingItem.name}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium">Reorder Level</Label>
-                  <p className="text-sm">{viewingItem.reorder_level} units</p>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Category</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <p className="text-sm font-medium">{viewingItem.category_name || 'No Category'}</p>
+                  </div>
                 </div>
               </div>
+
+              {/* Description */}
               {viewingItem.description && (
-                <div>
+                <div className="space-y-2">
                   <Label className="text-sm font-medium">Description</Label>
-                  <p className="text-sm">{viewingItem.description}</p>
-                </div>
-              )}
-              {viewingItem.supplier_name && (
-                <div>
-                  <Label className="text-sm font-medium">Supplier</Label>
-                  <p className="text-sm">{viewingItem.supplier_name}</p>
-                </div>
-              )}
-              {viewingItem.price && (
-                <div>
-                  <Label className="text-sm font-medium">Price per Unit</Label>
-                  <p className="text-sm">₱{viewingItem.price.toFixed(2)}</p>
+                  <div className="p-3 bg-gray-50 rounded-md border min-h-[80px]">
+                    <p className="text-sm">{viewingItem.description}</p>
+                  </div>
                 </div>
               )}
 
+              {/* Stock Information */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Current Stock</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{viewingItem.stock} units</span>
+                      {viewingItem.stock === 0 && (
+                        <Badge variant="destructive" className="text-xs">Out of Stock</Badge>
+                      )}
+                      {viewingItem.stock > 0 && viewingItem.stock <= viewingItem.reorder_level && (
+                        <Badge variant="secondary" className="text-xs">Low Stock</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Reorder Level</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <p className="text-sm font-medium">{viewingItem.reorder_level} units</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Price per Unit</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <p className="text-sm font-medium">
+                      {viewingItem.price ? `₱${viewingItem.price.toFixed(2)}` : 'Not set'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Supplier Information */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Supplier</Label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  <p className="text-sm font-medium">{viewingItem.supplier_name || 'No Supplier'}</p>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
+      {/* Medicine Form for Add/Edit */}
+      <InventoryMedicineForm
+        editingMedicine={editingItem}
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        onSuccess={() => {
+          setEditingItem(null)
+          setFormDialogOpen(false)
+          handleRefreshMedicines()
+        }}
+      />
 
     </div>
   )

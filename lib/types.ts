@@ -39,7 +39,7 @@ export interface SupplyItem {
 }
 
 // Database enums
-export type ItemTypeMedical = 'medicine' | 'supply'
+export type ItemTypeMedical = 'Medicine' | 'Supply'
 
 // Category and Supplier types
 export interface MedicalCategory {
@@ -87,7 +87,7 @@ export interface InventorySupply {
 export interface InventoryTransaction {
   id: string
   type: 'stock_in' | 'stock_out' | 'adjustment'
-  itemType: 'medicine' | 'supply'
+  itemType: 'Medicine' | 'Supply'
   itemId: string
   itemName: string
   quantity: number

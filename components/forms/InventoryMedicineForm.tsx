@@ -17,22 +17,27 @@ import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Plus } from 'lucide-react'
+import { CategoryManagementModal } from '@/components/ui/category-management-modal'
+import { SupplierManagementModal } from '@/components/ui/supplier-management-modal'
+import { SelectSeparator } from '@/components/ui/select'
 
 // Validation schema - updated to match database fields
 const medicineSchema = z.object({
   name: z.string().min(1, 'Medicine name is required'),
   description: z.string().optional(),
-  category_id: z.number().optional(),
+  category_id: z.number().nullable().optional(),
   stock: z.number().min(0, 'Stock must be non-negative').optional(),
   reorder_level: z.number().min(0, 'Reorder level must be non-negative').optional(),
   price: z.number().min(0, 'Price per unit must be non-negative').optional(),
-  supplier_id: z.number().optional()
+  supplier_id: z.number().nullable().optional()
 })
 
 interface InventoryMedicineFormProps {
   onSuccess: () => void
   trigger?: React.ReactNode
   editingMedicine?: InventoryMedicine | null
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 // Custom SelectContent without scroll arrows
@@ -71,13 +76,17 @@ const CustomSelectContent = React.forwardRef<
 ))
 CustomSelectContent.displayName = "CustomSelectContent"
 
-export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: InventoryMedicineFormProps) {
+export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine, open, onOpenChange }: InventoryMedicineFormProps) {
   const { user } = useAuth()
   const { toast } = useToast()
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [categories, setCategories] = React.useState<MedicalCategory[]>([])
   const [suppliers, setSuppliers] = React.useState<MedicalSupplier[]>([])
   const [loading, setLoading] = React.useState(false)
+
+  // Use external dialog control if provided, otherwise use internal state
+  const isDialogOpen = open !== undefined ? open : dialogOpen
+  const setIsDialogOpen = onOpenChange || setDialogOpen
 
   const form = useForm<z.infer<typeof medicineSchema>>({
     resolver: zodResolver(medicineSchema),
@@ -92,17 +101,25 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
     }
   })
 
+  // Watch required fields to enable/disable submit button
+  const watchedFields = form.watch(['name', 'stock', 'reorder_level', 'category_id', 'supplier_id'])
+  const isFormValid = watchedFields[0] && 
+                     watchedFields[1] !== undefined && 
+                     watchedFields[2] !== undefined &&
+                     watchedFields[3] !== undefined &&
+                     watchedFields[4] !== undefined
+
   // Load categories and suppliers when dialog opens
   React.useEffect(() => {
-    if (dialogOpen) {
+    if (isDialogOpen) {
       loadCategories()
       loadSuppliers()
     }
-  }, [dialogOpen])
+  }, [isDialogOpen])
 
   // Set form values when editing
   React.useEffect(() => {
-    if (editingMedicine && dialogOpen) {
+    if (editingMedicine && isDialogOpen) {
       form.reset({
         name: editingMedicine.name,
         description: editingMedicine.description || '',
@@ -112,7 +129,7 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
         price: editingMedicine.price,
         supplier_id: editingMedicine.supplier_id
       })
-    } else if (dialogOpen) {
+    } else if (isDialogOpen) {
       // Add mode - reset to empty form
       form.reset({
         name: '',
@@ -124,11 +141,11 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
         supplier_id: undefined
       })
     }
-  }, [form, editingMedicine, dialogOpen])
+  }, [form, editingMedicine, isDialogOpen])
 
   const loadCategories = async () => {
     try {
-      const response = await fetch('/api/inventory/categories?type=medicine')
+      const response = await fetch('/api/inventory/categories?type=Medicine')
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -149,6 +166,24 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
       }
     } catch (error) {
       console.error('Error loading suppliers:', error)
+    }
+  }
+
+  const handleCategoriesChange = async () => {
+    await loadCategories()
+    // Reset category selection if the current category no longer exists
+    const currentCategoryId = form.getValues('category_id')
+    if (currentCategoryId && !categories.find(c => c.id === currentCategoryId)) {
+      form.setValue('category_id', null)
+    }
+  }
+
+  const handleSuppliersChange = async () => {
+    await loadSuppliers()
+    // Reset supplier selection if the current supplier no longer exists
+    const currentSupplierId = form.getValues('supplier_id')
+    if (currentSupplierId && !suppliers.find(s => s.id === currentSupplierId)) {
+      form.setValue('supplier_id', null)
     }
   }
 
@@ -210,7 +245,7 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
         })
       }
       
-      setDialogOpen(false)
+      setIsDialogOpen(false)
       form.reset()
       onSuccess()
     } catch (error) {
@@ -226,15 +261,12 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
   }
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            {editingMedicine ? 'Edit Medicine' : 'Add Medicine'}
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl [&>button]:hidden">
         <DialogHeader>
           <DialogTitle>
@@ -297,17 +329,20 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>Category *</FormLabel>
                       <Select 
-                        value={field.value?.toString() || ""} 
-                        onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                        value={field.value === null ? "none" : (field.value ? field.value.toString() : "")} 
+                        onValueChange={(value) => field.onChange(value === "none" ? null : (value ? parseInt(value) : undefined))}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder="Select Category">
+                              {field.value === null ? "None" : (field.value ? categories.find(c => c.id === field.value)?.name : undefined)}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <CustomSelectContent>
+                          <SelectItem value="none">None</SelectItem>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name}
@@ -318,6 +353,18 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
                               No categories available
                             </SelectItem>
                           )}
+                          <SelectSeparator className="my-2" />
+                          <div className="px-2 py-1.5">
+                            <CategoryManagementModal
+                              type="Medicine"
+                              onCategoriesChange={handleCategoriesChange}
+                              trigger={
+                                <button className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground rounded-sm relative">
+                                  Manage Categories
+                                </button>
+                              }
+                            />
+                          </div>
                         </CustomSelectContent>
                       </Select>
                       <FormMessage />
@@ -332,17 +379,20 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
                   name="supplier_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Supplier</FormLabel>
+                      <FormLabel>Supplier *</FormLabel>
                       <Select 
-                        value={field.value?.toString() || ""} 
-                        onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                        value={field.value === null ? "none" : (field.value ? field.value.toString() : "")} 
+                        onValueChange={(value) => field.onChange(value === "none" ? null : (value ? parseInt(value) : undefined))}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select supplier" />
+                            <SelectValue placeholder="Select Supplier">
+                              {field.value === null ? "None" : (field.value ? suppliers.find(s => s.id === field.value)?.name : undefined)}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <CustomSelectContent>
+                          <SelectItem value="none">None</SelectItem>
                           {suppliers.map((supplier) => (
                             <SelectItem key={supplier.id} value={supplier.id.toString()}>
                               {supplier.name}
@@ -353,6 +403,17 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
                               No suppliers available
                             </SelectItem>
                           )}
+                          <SelectSeparator className="my-2" />
+                          <div className="px-2 py-1.5">
+                            <SupplierManagementModal
+                              onSuppliersChange={handleSuppliersChange}
+                              trigger={
+                                <button className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground rounded-sm relative">
+                                  Manage Suppliers
+                                </button>
+                              }
+                            />
+                          </div>
                         </CustomSelectContent>
                       </Select>
                       <FormMessage />
@@ -410,7 +471,7 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
                 name="price"
                 render={({ field }) => (
                                       <FormItem>
-                      <FormLabel>Price per Unit</FormLabel>
+                      <FormLabel>Price (Per Item)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₱</span>
@@ -436,12 +497,12 @@ export function InventoryMedicineForm({ onSuccess, trigger, editingMedicine }: I
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setDialogOpen(false)}
+                onClick={() => setIsDialogOpen(false)}
                 disabled={loading}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !isFormValid}>
                 {loading ? 'Saving...' : (editingMedicine ? 'Update Medicine' : 'Add Medicine')}
               </Button>
             </div>

@@ -70,6 +70,8 @@ export function SupplierManagementModal({ onSuppliersChange, trigger }: Supplier
         setNewSupplierName('');
         // Only refresh suppliers, not the entire table
         loadSuppliers();
+        // Call the callback to refresh parent components
+        onSuppliersChange();
       } else {
         const data = await response.json();
         showErrorToast('Error', data.error || 'Failed to add supplier');
@@ -92,6 +94,8 @@ export function SupplierManagementModal({ onSuppliersChange, trigger }: Supplier
         setEditingSupplier(null);
         // Only refresh suppliers, not the entire table
         loadSuppliers();
+        // Call the callback to refresh parent components
+        onSuppliersChange();
       } else {
         const data = await response.json();
         showErrorToast('Error', data.error || 'Failed to update supplier');
@@ -114,6 +118,8 @@ export function SupplierManagementModal({ onSuppliersChange, trigger }: Supplier
         showSuccessToast('Supplier Deleted', `${deletingSupplier.name} has been deleted successfully.`);
         // Only refresh suppliers, not the entire table
         loadSuppliers();
+        // Call the callback to refresh parent components
+        onSuppliersChange();
         setDeletingSupplier(null);
       } else {
         const data = await response.json();

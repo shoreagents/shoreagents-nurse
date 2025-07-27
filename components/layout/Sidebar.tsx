@@ -15,7 +15,12 @@ import {
   Users,
   Activity,
   Heart,
-  Pill
+  Pill,
+  Settings,
+  HelpCircle,
+  MessageSquare,
+  Bug,
+  Lightbulb
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { permissions } from '@/lib/auth'
@@ -44,7 +49,7 @@ interface NavigationSection {
 const navigationSections: NavigationSection[] = [
   {
     id: 'platform',
-    label: 'Platform',
+    label: 'Main',
     icon: Home,
     items: [
       {
@@ -77,14 +82,14 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         id: 'clinic-log-form',
-        label: 'New Clinic Log',
+        label: 'Inventory Request',
         href: '/clinic-log-form',
         icon: MonitorCheckIcon,
         requiredPermission: permissions.canCreateClinicLog
       },
       {
         id: 'reimbursement-form',
-        label: 'New Reimbursement',
+        label: 'Reimbursement Request',
         href: '/reimbursement-form',
         icon: CircleDollarSignIcon,
         requiredPermission: permissions.canCreateReimbursement
@@ -97,15 +102,22 @@ const navigationSections: NavigationSection[] = [
     icon: Database,
     items: [
       {
+        id: 'visit-history',
+        label: 'Visit History',
+        href: '/visit-history',
+        icon: Activity,
+        requiredPermission: permissions.canViewClinicLogs
+      },
+      {
         id: 'clinic-records',
-        label: 'Clinic Records',
+        label: 'Inventory Logs',
         href: '/clinic-records',
         icon: FoldersIcon,
         requiredPermission: permissions.canViewClinicLogs
       },
       {
         id: 'reimbursement-records',
-        label: 'Reimbursement Records',
+        label: 'Reimbursement Logs',
         href: '/reimbursement-records',
         icon: FileCheck2Icon,
         requiredPermission: permissions.canViewReimbursements
@@ -146,6 +158,41 @@ const navigationSections: NavigationSection[] = [
         requiredPermission: permissions.canCreateClinicLog // Using existing permission for now
       }
     ]
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    items: [
+      {
+        id: 'settings',
+        label: 'Settings',
+        href: '/settings',
+        icon: Settings,
+        requiredPermission: () => true // Always visible
+      }
+    ]
+  },
+  {
+    id: 'help',
+    label: 'Help',
+    icon: HelpCircle,
+    items: [
+      {
+        id: 'it-ticket',
+        label: 'IT Ticket',
+        href: '/it-ticket',
+        icon: MessageSquare,
+        requiredPermission: () => true // Always visible
+      },
+      {
+        id: 'bugs-suggestions',
+        label: 'Bugs & Suggestions',
+        href: '/bugs-suggestions',
+        icon: Lightbulb,
+        requiredPermission: () => true // Always visible
+      }
+    ]
   }
 ]
 
@@ -182,7 +229,41 @@ const SidebarComponent = React.memo(function Sidebar({}: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 overflow-y-auto">
         <div className="space-y-6">
-          {filteredSections.map((section) => (
+          {/* Dashboard without section label */}
+          {filteredSections.find(section => section.id === 'platform')?.items.map((item) => {
+            const Icon = item.icon
+            const isActive = router.pathname === item.href
+            
+            return (
+              <Link 
+                key={item.id} 
+                href={item.href} 
+                prefetch={true}
+                onMouseEnter={() => setHoveredItem(item.id)}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={cn(
+                  "group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
+                  "text-gray-700 justify-start",
+                  !isActive && "hover:bg-gray-100 hover:text-gray-900",
+                  isActive && "bg-green-100 text-green-900"
+                )}
+              >
+                {Icon === GripIcon ? (
+                  <GripIcon 
+                    className="h-5 w-5 flex-shrink-0 mr-3" 
+                    size={20}
+                    animate={hoveredItem === item.id}
+                  />
+                ) : (
+                  <Icon className="h-5 w-5 flex-shrink-0 mr-3" />
+                )}
+                <span className="truncate">{item.label}</span>
+              </Link>
+            )
+          })}
+          
+          {/* Other sections with labels */}
+          {filteredSections.filter(section => !['settings', 'help', 'platform'].includes(section.id)).map((section) => (
             <div key={section.id}>
               <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
                 {section.label}
@@ -231,12 +312,6 @@ const SidebarComponent = React.memo(function Sidebar({}: SidebarProps) {
                           size={20}
                           animate={hoveredItem === item.id}
                         />
-                      ) : Icon === GripIcon ? (
-                        <GripIcon 
-                          className="h-5 w-5 flex-shrink-0 mr-3" 
-                          size={20}
-                          animate={hoveredItem === item.id}
-                        />
                       ) : Icon === MonitorCheckIcon ? (
                         <MonitorCheckIcon 
                           className="h-5 w-5 flex-shrink-0 mr-3" 
@@ -267,6 +342,71 @@ const SidebarComponent = React.memo(function Sidebar({}: SidebarProps) {
           ))}
         </div>
       </nav>
+
+      {/* Help at bottom (outside border) */}
+      {filteredSections.find(section => section.id === 'help') && (
+        <div className="px-4 py-4">
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+            Get Help
+          </div>
+          <div className="space-y-1">
+            {filteredSections.find(section => section.id === 'help')?.items.map((item) => {
+              const Icon = item.icon
+              const isActive = router.pathname === item.href
+              
+              return (
+                <Link 
+                  key={item.id} 
+                  href={item.href} 
+                  prefetch={true}
+                  onMouseEnter={() => setHoveredItem(item.id)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={cn(
+                    "group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
+                    "text-gray-700 justify-start",
+                    !isActive && "hover:bg-gray-100 hover:text-gray-900",
+                    isActive && "bg-green-100 text-green-900"
+                  )}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0 mr-3" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Settings at very bottom */}
+      {filteredSections.find(section => section.id === 'settings') && (
+        <div className="px-4 py-4 border-t border-gray-200">
+          <div className="space-y-1">
+            {filteredSections.find(section => section.id === 'settings')?.items.map((item) => {
+              const Icon = item.icon
+              const isActive = router.pathname === item.href
+              
+              return (
+                <Link 
+                  key={item.id} 
+                  href={item.href} 
+                  prefetch={true}
+                  onMouseEnter={() => setHoveredItem(item.id)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={cn(
+                    "group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150",
+                    "text-gray-700 justify-start",
+                    !isActive && "hover:bg-gray-100 hover:text-gray-900",
+                    isActive && "bg-green-100 text-green-900"
+                  )}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0 mr-3" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 })

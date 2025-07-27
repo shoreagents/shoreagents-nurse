@@ -13,9 +13,9 @@ import { useToast } from '@/hooks/use-toast';
 import { showSuccessToast, showErrorToast } from '@/lib/toast-utils';
 
 interface CategoryManagementModalProps {
-  type: ItemTypeMedical;
-  onCategoriesChange: () => void;
-  trigger?: React.ReactNode;
+  type: 'Medicine' | 'Supply'
+  onCategoriesChange: () => void
+  trigger: React.ReactNode
 }
 
 export function CategoryManagementModal({ type, onCategoriesChange, trigger }: CategoryManagementModalProps) {
@@ -73,6 +73,8 @@ export function CategoryManagementModal({ type, onCategoriesChange, trigger }: C
         setNewCategoryName('');
         // Only refresh categories, not the entire table
         loadCategories();
+        // Call the callback to refresh parent components
+        onCategoriesChange();
       } else {
         const data = await response.json();
         showErrorToast('Error', data.error || 'Failed to add category');
@@ -95,6 +97,8 @@ export function CategoryManagementModal({ type, onCategoriesChange, trigger }: C
         setEditingCategory(null);
         // Only refresh categories, not the entire table
         loadCategories();
+        // Call the callback to refresh parent components
+        onCategoriesChange();
       } else {
         const data = await response.json();
         showErrorToast('Error', data.error || 'Failed to update category');
@@ -117,6 +121,8 @@ export function CategoryManagementModal({ type, onCategoriesChange, trigger }: C
         showSuccessToast('Category Deleted', `${deletingCategory.name} has been deleted successfully.`);
         // Only refresh categories, not the entire table
         loadCategories();
+        // Call the callback to refresh parent components
+        onCategoriesChange();
         setDeletingCategory(null);
       } else {
         const data = await response.json();
@@ -138,7 +144,7 @@ export function CategoryManagementModal({ type, onCategoriesChange, trigger }: C
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Manage {type === 'medicine' ? 'Medicine' : 'Supply'} Categories</DialogTitle>
+            <DialogTitle>Manage {type === 'Medicine' ? 'Medicine' : 'Supply'} Categories</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 mt-4">
