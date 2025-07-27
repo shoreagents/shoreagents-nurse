@@ -182,7 +182,7 @@ const MedicineTable = React.memo(function MedicineTable({ className, autoOpenFor
 
   // Stock status helper
   const getStockStatus = (stock: number, reorderLevel: number) => {
-    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const }
+    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const, className: 'bg-red-300 text-red-900 border-red-300 hover:bg-red-300' }
     if (stock <= reorderLevel) return { status: 'Low Stock', variant: 'secondary' as const }
     return { status: 'In Stock', variant: 'default' as const }
   }
@@ -213,23 +213,21 @@ const MedicineTable = React.memo(function MedicineTable({ className, autoOpenFor
       key: 'stock',
       header: 'Stock',
       sortable: true,
+      render: (value, record) => (
+        <div className="flex items-center gap-2">
+          <span>{String(value)}</span>
+          {Number(value) <= record.reorder_level && (
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'reorder_level',
+      header: 'Status',
       render: (value, record) => {
-        const { status, variant } = getStockStatus(Number(value), record.reorder_level)
-        return (
-          <div className="flex items-center gap-2">
-            <span>{String(value || 0)}</span>
-            <Badge 
-              variant={variant} 
-              className={`text-xs ${
-                status === 'Out of Stock' ? 'bg-red-400 text-white hover:bg-red-400' : 
-                status === 'Low Stock' ? 'hover:bg-secondary' : 
-                'hover:bg-primary'
-              }`}
-            >
-              {status}
-            </Badge>
-          </div>
-        )
+        const stockStatus = getStockStatus(record.stock, record.reorder_level)
+        return <Badge variant={stockStatus.variant} className={stockStatus.className}>{stockStatus.status}</Badge>
       }
     },
     {
@@ -345,9 +343,10 @@ const MedicineTable = React.memo(function MedicineTable({ className, autoOpenFor
           <Button
             variant="outline"
             size="sm"
+            className="flex items-center gap-2"
             onClick={handleExportMedicines}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="h-4 w-4" />
             Export
           </Button>
         </div>

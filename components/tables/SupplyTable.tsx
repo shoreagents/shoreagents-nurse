@@ -182,7 +182,7 @@ const SupplyTable = React.memo(function SupplyTable({ className, autoOpenForm }:
 
   // Stock status helper
   const getStockStatus = (stock: number, reorderLevel: number) => {
-    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const }
+    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const, className: 'bg-red-300 text-red-900 border-red-300 hover:bg-red-300' }
     if (stock <= reorderLevel) return { status: 'Low Stock', variant: 'secondary' as const }
     return { status: 'In Stock', variant: 'default' as const }
   }
@@ -345,9 +345,10 @@ const SupplyTable = React.memo(function SupplyTable({ className, autoOpenForm }:
           <Button
             variant="outline"
             size="sm"
+            className="flex items-center gap-2"
             onClick={handleExportSupplies}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="h-4 w-4" />
             Export
           </Button>
         </div>
