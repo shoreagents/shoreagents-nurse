@@ -229,6 +229,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-y: hidden;
   }
 }
 
@@ -459,6 +460,16 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--accent));
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }
 
 /* AI-Enhanced Component Styles */

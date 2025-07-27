@@ -70,7 +70,7 @@ export const showDeleteErrorToast = (itemType: string = "item") => {
 }
 
 export const showFormResetToast = () => {
-  showInfoToast(
+  showSuccessToast(
     "Form Reset",
     "All form fields have been cleared."
   )

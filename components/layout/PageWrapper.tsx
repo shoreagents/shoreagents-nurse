@@ -77,7 +77,7 @@ export function PageWrapper({
       )}
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto h-full">
         {children}
       </div>
     </div>

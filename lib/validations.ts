@@ -48,41 +48,18 @@ const supplyItemSchema = z.object({
 })
 
 const clinicLogFormBaseSchema = z.object({
-  date: dateSchema.refine((date) => date <= new Date(), {
-    message: "Date cannot be in the future"
-  }),
-  lastName: z.string()
-    .min(2, "Last name must be at least 2 characters")
-    .max(50, "Last name must not exceed 50 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "Last name can only contain letters, spaces, apostrophes, and hyphens"),
-  firstName: z.string()
-    .min(2, "First name must be at least 2 characters")
-    .max(50, "First name must not exceed 50 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "First name can only contain letters, spaces, apostrophes, and hyphens"),
-  sex: z.enum(['Male', 'Female'], {
-    required_error: "Sex is required"
-  }),
-  employeeNumber: z.string()
-    .min(3, "Employee number must be at least 3 characters")
-    .max(20, "Employee number must not exceed 20 characters")
-    .regex(/^[A-Z0-9-]+$/, "Employee number can only contain uppercase letters, numbers, and hyphens"),
-  client: z.string()
-    .min(2, "Client must be at least 2 characters")
-    .max(100, "Client must not exceed 100 characters"),
-  chiefComplaint: z.string()
-    .min(3, "Chief complaint must be at least 3 characters")
-    .max(200, "Chief complaint must not exceed 200 characters"),
+  patientDiagnose: z.string().min(1, "Patient diagnosis is required"),
+  additionalNotes: z.string().optional(),
   medicines: z.array(medicineItemSchema).optional().default([]),
   supplies: z.array(supplyItemSchema).optional().default([]),
   issuedBy: z.string()
-    .min(2, "Issued by must be at least 2 characters")
-    .max(100, "Issued by must not exceed 100 characters")
+    .min(2)
+    .max(100)
 })
 
 export const clinicLogFormSchema = clinicLogFormBaseSchema.refine((data) => {
   return data.medicines && data.medicines.length > 0 || data.supplies && data.supplies.length > 0
 }, {
-  message: "At least one medicine or supply must be added",
   path: ["medicines"]
 })
 

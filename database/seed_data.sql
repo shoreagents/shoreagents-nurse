@@ -66,11 +66,11 @@ INSERT INTO inventory_supplies (id, name, display_name, description, category, s
 -- SAMPLE CLINIC LOGS
 -- ==================================================
 
-INSERT INTO clinic_logs (id, date, last_name, first_name, sex, employee_number, client, chief_complaint, issued_by, nurse_id, nurse_name, status) VALUES
-('aa0e8400-e29b-41d4-a716-446655440001', '2024-01-15', 'Smith', 'John', 'Male', 'EMP001', 'Shore Agents Corp', 'Headache and fever', 'Main Pharmacy', 'N001', 'Dr. Sarah Johnson', 'active'),
-('aa0e8400-e29b-41d4-a716-446655440002', '2024-01-16', 'Davis', 'Emily', 'Female', 'EMP002', 'Tech Solutions Inc', 'Minor cut on hand', 'Emergency Supply Unit', 'N002', 'Nurse Maria Santos', 'active'),
-('aa0e8400-e29b-41d4-a716-446655440003', '2024-01-17', 'Wilson', 'Michael', 'Male', 'EMP003', 'Maritime Services Ltd', 'Stomach pain', 'Main Pharmacy', 'N001', 'Dr. Sarah Johnson', 'active'),
-('aa0e8400-e29b-41d4-a716-446655440004', '2024-01-18', 'Brown', 'Sarah', 'Female', 'EMP004', 'Global Logistics Co', 'Cough and cold symptoms', 'Wellness Center Pharmacy', 'N002', 'Nurse Maria Santos', 'active');
+INSERT INTO clinic_logs (id, date, last_name, first_name, employee_number, client, chief_complaint, issued_by, nurse_id, nurse_name, status) VALUES
+('aa0e8400-e29b-41d4-a716-446655440001', '2024-01-15', 'Smith', 'John', 'EMP001', 'Shore Agents Corp', 'Headache and fever', 'Main Pharmacy', 'N001', 'Dr. Sarah Johnson', 'active'),
+('aa0e8400-e29b-41d4-a716-446655440002', '2024-01-16', 'Davis', 'Emily', 'EMP002', 'Tech Solutions Inc', 'Minor cut on hand', 'Emergency Supply Unit', 'N002', 'Nurse Maria Santos', 'active'),
+('aa0e8400-e29b-41d4-a716-446655440003', '2024-01-17', 'Wilson', 'Michael', 'EMP003', 'Maritime Services Ltd', 'Stomach pain', 'Main Pharmacy', 'N001', 'Dr. Sarah Johnson', 'active'),
+('aa0e8400-e29b-41d4-a716-446655440004', '2024-01-18', 'Brown', 'Sarah', 'EMP004', 'Global Logistics Co', 'Cough and cold symptoms', 'Wellness Center Pharmacy', 'N002', 'Nurse Maria Santos', 'active');
 
 -- ==================================================
 -- SAMPLE CLINIC LOG MEDICINES

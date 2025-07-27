@@ -167,7 +167,7 @@ const SupplyTable = React.memo(function SupplyTable({ className }: SupplyTablePr
 
   // Stock status helper
   const getStockStatus = (stock: number, reorderLevel: number) => {
-    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const }
+    if (stock === 0) return { status: 'Out of Stock', variant: 'destructive' as const, className: 'bg-red-300 text-red-900 border-red-300 hover:bg-red-300' }
     if (stock <= reorderLevel) return { status: 'Low Stock', variant: 'secondary' as const }
     return { status: 'In Stock', variant: 'default' as const }
   }
@@ -203,14 +203,14 @@ const SupplyTable = React.memo(function SupplyTable({ className }: SupplyTablePr
         </div>
       )
     },
-    {
-      key: 'reorder_level',
-      header: 'Status',
-      render: (value, record) => {
-        const stockStatus = getStockStatus(record.stock, record.reorder_level)
-        return <Badge variant={stockStatus.variant}>{stockStatus.status}</Badge>
-      }
-    },
+          {
+        key: 'reorder_level',
+        header: 'Status',
+        render: (value, record) => {
+          const stockStatus = getStockStatus(record.stock, record.reorder_level)
+          return <Badge variant={stockStatus.variant} className={stockStatus.className}>{stockStatus.status}</Badge>
+        }
+      },
     {
       key: 'supplier_name',
       header: 'Supplier',
@@ -220,6 +220,7 @@ const SupplyTable = React.memo(function SupplyTable({ className }: SupplyTablePr
     {
       key: 'price',
       header: 'Price',
+      sortable: true,
       render: (value) => (
         value ? `₱${Number(value).toFixed(2)}` : 'N/A'
       )
@@ -324,9 +325,10 @@ const SupplyTable = React.memo(function SupplyTable({ className }: SupplyTablePr
           <Button
             variant="outline"
             size="sm"
+            className="flex items-center gap-2"
             onClick={handleExportSupplies}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="h-4 w-4" />
             Export
           </Button>
         </div>

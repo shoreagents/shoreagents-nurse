@@ -161,8 +161,7 @@ CREATE INDEX idx_inventory_transactions_reference ON inventory_transactions(refe
 CREATE TABLE clinic_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     date DATE NOT NULL COMMENT 'Date of the clinic visit',
-    last_name VARCHAR(255) NOT NULL COMMENT 'Patient last name',
-    first_name VARCHAR(255) NOT NULL COMMENT 'Patient first name',
+    full_name VARCHAR(255) NOT NULL COMMENT 'Patient full name',
     sex VARCHAR(10) NOT NULL CHECK (sex IN ('Male', 'Female')) COMMENT 'Patient biological sex',
     employee_number VARCHAR(50) NOT NULL COMMENT 'Employee ID number of the patient',
     client VARCHAR(255) NOT NULL COMMENT 'Client company or organization the employee belongs to',

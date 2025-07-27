@@ -104,12 +104,8 @@ export interface InventoryTransaction {
 export interface ClinicLog {
   id: string
   date: Date
-  lastName: string
-  firstName: string
-  sex: 'Male' | 'Female'
-  employeeNumber: string
-  client: string
   chiefComplaint: string
+  additionalNotes?: string
   medicines: MedicineItem[]
   supplies: SupplyItem[]
   issuedBy: string
@@ -121,13 +117,8 @@ export interface ClinicLog {
 }
 
 export interface ClinicLogFormData {
-  date: Date
-  lastName: string
-  firstName: string
-  sex: 'Male' | 'Female'
-  employeeNumber: string
-  client: string
-  chiefComplaint: string
+  patientDiagnose: string
+  additionalNotes?: string
   medicines: MedicineItem[]
   supplies: SupplyItem[]
   issuedBy: string
@@ -370,4 +361,165 @@ export interface HealthCheckFormData {
   employeeId: string
   requestType: 'routine' | 'urgent' | 'pre_employment' | 'other'
   notes?: string
+}
+
+// Database-based Patient types
+export type GenderEnum = 'Male' | 'Female' | 'Other' | 'Prefer not to say'
+export type UserTypeEnum = 'Agent' | 'Client' | 'Internal'
+
+// Core database tables interfaces
+export interface DbUser {
+  id: number
+  email: string
+  user_type: UserTypeEnum
+  created_at: Date
+  updated_at: Date
+}
+
+export interface DbPersonalInfo {
+  id: number
+  user_id: number
+  first_name: string
+  middle_name?: string
+  last_name: string
+  nickname?: string
+  profile_picture?: string
+  phone?: string
+  birthday?: Date
+  country?: string
+  city?: string
+  address?: string
+  gender?: GenderEnum
+  created_at: Date
+  updated_at: Date
+}
+
+export interface DbJobInfo {
+  id: number
+  employee_id: string
+  agent_user_id?: number
+  internal_user_id?: number
+  job_title?: string
+  shift_period?: string
+  shift_schedule?: string
+  shift_time?: string
+  work_setup?: string
+  employment_status?: string
+  hire_type?: string
+  staff_source?: string
+  start_date?: Date
+  exit_date?: Date
+  created_at: Date
+  updated_at: Date
+}
+
+export interface DbMember {
+  id: number
+  company: string
+  address?: string
+  phone?: string
+  logo?: string
+  service?: string
+  status?: string
+  created_at: Date
+  updated_at: Date
+}
+
+export interface DbAgent {
+  user_id: number
+  exp_points?: number
+  member_id: number
+  department_id?: number
+  created_at: Date
+  updated_at: Date
+}
+
+// Combined Patient interface for clinic use
+export interface InternalUser {
+  id: number
+  email: string
+  user_type: UserTypeEnum
+  first_name: string
+  middle_name?: string
+  last_name: string
+  full_name: string
+}
+
+export interface Patient {
+  id: number
+  user_id: number
+  email: string
+  employee_id: string
+  full_name: string
+  first_name: string
+  middle_name?: string
+  last_name: string
+  nickname?: string
+  profile_picture?: string
+  phone?: string
+  birthday?: Date
+  age?: number
+  country?: string
+  city?: string
+  address?: string
+  gender?: GenderEnum
+  company?: string
+  badge_color?: string
+  job_title?: string
+  employment_status?: string
+  user_type: UserTypeEnum
+  medical_history?: string | null
+  last_visited?: Date | null
+  created_at: Date
+  updated_at: Date
+}
+
+// Patient form data for creating/updating
+export interface PatientFormData {
+  email: string
+  user_type: UserTypeEnum
+  first_name: string
+  middle_name?: string
+  last_name: string
+  nickname?: string
+  phone?: string
+  birthday?: Date
+  country?: string
+  city?: string
+  address?: string
+  gender?: GenderEnum
+  employee_id: string
+  job_title?: string
+  employment_status?: string
+  company?: string
+  medical_history?: string
+}
+
+// Database-based Clinic Log types
+export interface DbClinicLog {
+  id: number
+  patient_id: number
+  patient_diagnose: string
+  additional_notes?: string
+  issued_by: string
+  created_at: Date
+  updated_at: Date
+  patient_email: string
+  patient_user_type: UserTypeEnum
+  patient_full_name: string
+  employee_id?: string
+  company?: string
+  badge_color?: string
+  medicines: DbClinicLogMedicine[]
+  supplies: DbClinicLogSupply[]
+}
+
+export interface DbClinicLogMedicine {
+  name: string
+  quantity: number
+}
+
+export interface DbClinicLogSupply {
+  name: string
+  quantity: number
 } 
