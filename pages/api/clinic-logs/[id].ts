@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           await query(`
             UPDATE inventory_medical 
             SET stock = stock + $1, updated_at = CURRENT_TIMESTAMP
-            WHERE name = $2 AND item_type = 'medicine'
+            WHERE name = $2 AND item_type = 'Medicine'
           `, [medicine.quantity, medicine.name])
         }
 
@@ -57,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           await query(`
             UPDATE inventory_medical 
             SET stock = stock + $1, updated_at = CURRENT_TIMESTAMP
-            WHERE name = $2 AND item_type = 'supply'
+            WHERE name = $2 AND item_type = 'Supply'
           `, [supply.quantity, supply.name])
         }
 

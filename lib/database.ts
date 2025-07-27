@@ -495,8 +495,6 @@ export const patientDb = {
         pi.profile_picture,
         pi.phone,
         pi.birthday,
-        pi.country,
-        pi.city,
         pi.address,
         pi.gender,
         pi.created_at,
@@ -545,8 +543,6 @@ export const patientDb = {
       phone: row.phone,
       birthday: row.birthday,
       age: row.age,
-      country: row.country,
-      city: row.city,
       address: row.address,
       gender: row.gender,
       company: row.company,
@@ -577,8 +573,6 @@ export const patientDb = {
         pi.profile_picture,
         pi.phone,
         pi.birthday,
-        pi.country,
-        pi.city,
         pi.address,
         pi.gender,
         pi.created_at,
@@ -629,8 +623,6 @@ export const patientDb = {
       phone: row.phone,
       birthday: row.birthday,
       age: row.age,
-      country: row.country,
-      city: row.city,
       address: row.address,
       gender: row.gender,
       company: row.company,
@@ -661,8 +653,6 @@ export const patientDb = {
         pi.profile_picture,
         pi.phone,
         pi.birthday,
-        pi.country,
-        pi.city,
         pi.address,
         pi.gender,
         pi.created_at,
@@ -693,8 +683,7 @@ export const patientDb = {
       )
       LEFT JOIN agents a ON (u.user_type = 'Agent' AND a.user_id = u.id)
       LEFT JOIN members m ON a.member_id = m.id
-      WHERE u.user_type IN ('Agent', 'Internal')
-        AND (
+      WHERE (
           pi.first_name ILIKE $1 OR 
           pi.last_name ILIKE $1 OR
           pi.middle_name ILIKE $1 OR
@@ -720,8 +709,6 @@ export const patientDb = {
       phone: row.phone,
       birthday: row.birthday,
       age: row.age,
-      country: row.country,
-      city: row.city,
       address: row.address,
       gender: row.gender,
       company: row.company,
@@ -755,9 +742,9 @@ export const patientDb = {
       const personalInfoResult = await client.query(`
         INSERT INTO personal_info (
           user_id, first_name, middle_name, last_name, nickname, 
-          phone, birthday, country, city, address, gender
+          phone, birthday, address, gender
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING id, created_at, updated_at
       `, [
         userId,
@@ -767,8 +754,6 @@ export const patientDb = {
         patientData.nickname,
         patientData.phone,
         patientData.birthday,
-        patientData.country,
-        patientData.city,
         patientData.address,
         patientData.gender
       ])
@@ -851,22 +836,14 @@ export const patientDb = {
         personalInfoUpdates.push(`phone = $${paramCount++}`)
         personalInfoValues.push(patientData.phone)
       }
-      if (patientData.birthday !== undefined) {
-        personalInfoUpdates.push(`birthday = $${paramCount++}`)
-        personalInfoValues.push(patientData.birthday)
-      }
-      if (patientData.country !== undefined) {
-        personalInfoUpdates.push(`country = $${paramCount++}`)
-        personalInfoValues.push(patientData.country)
-      }
-      if (patientData.city !== undefined) {
-        personalInfoUpdates.push(`city = $${paramCount++}`)
-        personalInfoValues.push(patientData.city)
-      }
-      if (patientData.address !== undefined) {
-        personalInfoUpdates.push(`address = $${paramCount++}`)
-        personalInfoValues.push(patientData.address)
-      }
+             if (patientData.birthday !== undefined) {
+         personalInfoUpdates.push(`birthday = $${paramCount++}`)
+         personalInfoValues.push(patientData.birthday)
+       }
+       if (patientData.address !== undefined) {
+         personalInfoUpdates.push(`address = $${paramCount++}`)
+         personalInfoValues.push(patientData.address)
+       }
       if (patientData.gender !== undefined) {
         personalInfoUpdates.push(`gender = $${paramCount++}`)
         personalInfoValues.push(patientData.gender)
@@ -964,7 +941,7 @@ export const patientDb = {
 
 // Clinic Log Database Functions  
 export const clinicLogDb = {
-  async create(clinicLogData: ClinicLogFormData & { nurseId: string; nurseName: string }): Promise<ClinicLog> {
+  async create(clinicLogData: ClinicLogFormData & { nurseId: string; nurseName: string; patientId: string }): Promise<ClinicLog> {
     const client = initializeDatabase()
     await client.query('BEGIN')
     
@@ -972,19 +949,16 @@ export const clinicLogDb = {
       // Create clinic log entry
       const clinicLogResult = await client.query(`
         INSERT INTO clinic_logs (
-          date, patient_id, chief_complaint, additional_notes, 
-          issued_by, nurse_id, nurse_name, status
+          patient_id, patient_diagnose, additional_notes, 
+          issued_by
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
+        VALUES ($1, $2, $3, $4)
         RETURNING id, created_at, updated_at
       `, [
-        clinicLogData.date,
         parseInt(clinicLogData.patientId),
-        clinicLogData.chiefComplaint,
+        clinicLogData.patientDiagnose,
         clinicLogData.additionalNotes,
-        clinicLogData.issuedBy,
-        clinicLogData.nurseId,
-        clinicLogData.nurseName
+        clinicLogData.issuedBy
       ])
       
       const clinicLogId = clinicLogResult.rows[0].id
@@ -993,12 +967,11 @@ export const clinicLogDb = {
       if (clinicLogData.medicines && clinicLogData.medicines.length > 0) {
         for (const medicine of clinicLogData.medicines) {
           await client.query(`
-            INSERT INTO clinic_log_medicines (clinic_log_id, name, custom_name, quantity)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO clinic_log_medicines (clinic_log_id, name, quantity)
+            VALUES ($1, $2, $3)
           `, [
             clinicLogId,
             medicine.name,
-            medicine.customName,
             medicine.quantity
           ])
         }
@@ -1008,12 +981,11 @@ export const clinicLogDb = {
       if (clinicLogData.supplies && clinicLogData.supplies.length > 0) {
         for (const supply of clinicLogData.supplies) {
           await client.query(`
-            INSERT INTO clinic_log_supplies (clinic_log_id, name, custom_name, quantity)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO clinic_log_supplies (clinic_log_id, name, quantity)
+            VALUES ($1, $2, $3)
           `, [
             clinicLogId,
             supply.name,
-            supply.customName,
             supply.quantity
           ])
         }
@@ -1024,8 +996,8 @@ export const clinicLogDb = {
       // Return the created clinic log
       return {
         id: clinicLogId.toString(),
-        date: clinicLogData.date,
-        chiefComplaint: clinicLogData.chiefComplaint,
+        date: new Date(),
+        chiefComplaint: clinicLogData.patientDiagnose,
         additionalNotes: clinicLogData.additionalNotes,
         medicines: clinicLogData.medicines || [],
         supplies: clinicLogData.supplies || [],
@@ -1045,49 +1017,48 @@ export const clinicLogDb = {
   async getByPatientId(patientId: number): Promise<ClinicLog[]> {
     const result = await query(`
       SELECT 
-        cl.id, cl.date, cl.chief_complaint, cl.additional_notes,
-        cl.issued_by, cl.nurse_id, cl.nurse_name, cl.status,
-        cl.created_at, cl.updated_at
+        cl.id, cl.patient_diagnose, cl.additional_notes,
+        cl.issued_by, cl.created_at, cl.updated_at
       FROM clinic_logs cl
-      WHERE cl.patient_id = $1 AND cl.status = 'active'
-      ORDER BY cl.date DESC, cl.created_at DESC
+      WHERE cl.patient_id = $1
+      ORDER BY cl.created_at DESC
     `, [patientId])
     
     const clinicLogs = []
     for (const row of result.rows) {
       // Get medicines for this clinic log
       const medicinesResult = await query(`
-        SELECT name, custom_name, quantity 
+        SELECT name, quantity 
         FROM clinic_log_medicines 
         WHERE clinic_log_id = $1
       `, [row.id])
       
       // Get supplies for this clinic log
       const suppliesResult = await query(`
-        SELECT name, custom_name, quantity 
+        SELECT name, quantity 
         FROM clinic_log_supplies 
         WHERE clinic_log_id = $1
       `, [row.id])
       
       clinicLogs.push({
         id: row.id.toString(),
-        date: row.date,
-        chiefComplaint: row.chief_complaint,
+        date: row.created_at,
+        chiefComplaint: row.patient_diagnose,
         additionalNotes: row.additional_notes,
         medicines: medicinesResult.rows.map(m => ({
           name: m.name,
-          customName: m.custom_name,
+          customName: undefined,
           quantity: parseFloat(m.quantity)
         })),
         supplies: suppliesResult.rows.map(s => ({
           name: s.name,
-          customName: s.custom_name,
+          customName: undefined,
           quantity: parseFloat(s.quantity)
         })),
         issuedBy: row.issued_by,
-        nurseId: row.nurse_id,
-        nurseName: row.nurse_name,
-        status: row.status,
+        nurseId: '',
+        nurseName: '',
+        status: 'active',
         createdAt: row.created_at,
         updatedAt: row.updated_at
       })

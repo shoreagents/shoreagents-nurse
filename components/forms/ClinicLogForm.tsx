@@ -194,14 +194,24 @@ const ClinicLogForm = React.memo(() => {
       patientDiagnose: data.patientDiagnose,
       additionalNotes: data.additionalNotes,
       issuedBy: data.issuedBy,
-      medicines: data.medicines.map(medicine => ({
-        name: medicine.name,
-        quantity: medicine.quantity
-      })),
-      supplies: data.supplies.map(supply => ({
-        name: supply.name,
-        quantity: supply.quantity
-      }))
+      medicines: data.medicines.map(medicine => {
+        // Find the medicine in the inventory to get its ID
+        const inventoryMedicine = medicines.find(m => m.name === medicine.name)
+        return {
+          inventory_item_id: inventoryMedicine?.id,
+          name: medicine.name,
+          quantity: medicine.quantity
+        }
+      }),
+      supplies: data.supplies.map(supply => {
+        // Find the supply in the inventory to get its ID
+        const inventorySupply = supplies.find(s => s.name === supply.name)
+        return {
+          inventory_item_id: inventorySupply?.id,
+          name: supply.name,
+          quantity: supply.quantity
+        }
+      })
     }
 
     // Send to API
@@ -524,11 +534,11 @@ const ClinicLogForm = React.memo(() => {
                      ) : medicineFields.length === 0 ? (
                        <div className="flex-1 flex items-start justify-center pt-8">
                          <div className="text-center">
-                                                           <div className="text-sm text-gray-500">No medicines added yet</div>
+                           <div className="text-sm text-gray-500">No medicines added yet</div>
                          </div>
                        </div>
                      ) : (
-                        medicineFields.map((field, index) => (
+                       medicineFields.map((field, index) => (
                           <div key={field.id} className="p-4 border rounded-lg bg-white space-y-3">
                             {/* Row 1: Medicine Selector and Quantity */}
                             <div className="flex items-center gap-4">
@@ -541,12 +551,19 @@ const ClinicLogForm = React.memo(() => {
                                       <FormLabel className="text-xs font-medium text-gray-700">Name</FormLabel>
                                       <FormControl>
                                         <Combobox
-                                          options={medicines.map((medicine: InventoryMedicine) => ({
-                                            value: medicine.name,
-                                            label: medicine.name,
-                                            category: medicine.category_name,
-                                            disabled: medicine.stock === 0
-                                          }))}
+                                          options={medicines
+                                            .filter((medicine: InventoryMedicine) => {
+                                              // Get all currently selected medicine names
+                                              const selectedMedicineNames = form.watch('medicines').map(m => m.name).filter(Boolean)
+                                              // Only show medicines that are not already selected (or this current field)
+                                              return !selectedMedicineNames.includes(medicine.name) || medicine.name === field.value
+                                            })
+                                            .map((medicine: InventoryMedicine) => ({
+                                              value: medicine.name,
+                                              label: medicine.name,
+                                              category: medicine.category_name,
+                                              disabled: medicine.stock === 0
+                                            }))}
                                           value={field.value}
                                           onValueChange={field.onChange}
                                           placeholder="Select medicine"
@@ -682,12 +699,19 @@ const ClinicLogForm = React.memo(() => {
                                    <FormLabel className="text-xs font-medium text-gray-700">Name</FormLabel>
                                    <FormControl>
                                      <Combobox
-                                       options={supplies.map((supply: InventorySupply) => ({
-                                         value: supply.name,
-                                         label: supply.name,
-                                         category: supply.category_name,
-                                         disabled: supply.stock === 0
-                                       }))}
+                                       options={supplies
+                                         .filter((supply: InventorySupply) => {
+                                           // Get all currently selected supply names
+                                           const selectedSupplyNames = form.watch('supplies').map(s => s.name).filter(Boolean)
+                                           // Only show supplies that are not already selected (or this current field)
+                                           return !selectedSupplyNames.includes(supply.name) || supply.name === field.value
+                                         })
+                                         .map((supply: InventorySupply) => ({
+                                           value: supply.name,
+                                           label: supply.name,
+                                           category: supply.category_name,
+                                           disabled: supply.stock === 0
+                                         }))}
                                        value={field.value}
                                        onValueChange={field.onChange}
                                        placeholder="Select supply"

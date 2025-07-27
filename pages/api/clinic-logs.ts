@@ -31,16 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (medicines && medicines.length > 0) {
           for (const medicine of medicines) {
             await query(`
-              INSERT INTO clinic_log_medicines (clinic_log_id, name, quantity)
-              VALUES ($1, $2, $3)
-            `, [clinicLogId, medicine.name, medicine.quantity])
-
-            // Update inventory stock (deduct)
-            await query(`
-              UPDATE inventory_medical 
-              SET stock = stock - $1, updated_at = CURRENT_TIMESTAMP
-              WHERE name = $2 AND item_type = 'medicine'
-            `, [medicine.quantity, medicine.name])
+              INSERT INTO clinic_log_medicines (clinic_log_id, inventory_item_id, quantity, name)
+              VALUES ($1, $2, $3, $4)
+            `, [clinicLogId, medicine.inventory_item_id, medicine.quantity, medicine.name])
           }
         }
 
@@ -48,16 +41,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (supplies && supplies.length > 0) {
           for (const supply of supplies) {
             await query(`
-              INSERT INTO clinic_log_supplies (clinic_log_id, name, quantity)
-              VALUES ($1, $2, $3)
-            `, [clinicLogId, supply.name, supply.quantity])
-
-            // Update inventory stock (deduct)
-            await query(`
-              UPDATE inventory_medical 
-              SET stock = stock - $1, updated_at = CURRENT_TIMESTAMP
-              WHERE name = $2 AND item_type = 'supply'
-            `, [supply.quantity, supply.name])
+              INSERT INTO clinic_log_supplies (clinic_log_id, inventory_item_id, quantity, name)
+              VALUES ($1, $2, $3, $4)
+            `, [clinicLogId, supply.inventory_item_id, supply.quantity, supply.name])
           }
         }
 

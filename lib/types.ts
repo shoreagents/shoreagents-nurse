@@ -459,8 +459,6 @@ export interface Patient {
   phone?: string
   birthday?: Date
   age?: number
-  country?: string
-  city?: string
   address?: string
   gender?: GenderEnum
   company?: string
@@ -484,8 +482,6 @@ export interface PatientFormData {
   nickname?: string
   phone?: string
   birthday?: Date
-  country?: string
-  city?: string
   address?: string
   gender?: GenderEnum
   employee_id: string

@@ -253,9 +253,9 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
             record.medicines.map((medicine, index) => (
               <Tooltip key={`medicine-${index}`}>
                 <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 p-1 bg-blue-50 rounded border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors">
-                    <PillAnimated size={12} className="text-blue-600" />
-                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                  <div className="flex items-center gap-1 p-1 bg-orange-50 rounded border border-orange-200 cursor-pointer hover:bg-orange-100 transition-colors">
+                    <PillAnimated size={12} className="text-orange-600" />
+                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
                       {medicine.quantity}
                     </Badge>
                   </div>
@@ -281,9 +281,9 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
             record.supplies.map((supply, index) => (
               <Tooltip key={`supply-${index}`}>
                 <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 p-1 bg-green-50 rounded border border-green-200 cursor-pointer hover:bg-green-100 transition-colors">
-                    <BoxesIcon size={12} className="text-green-600" />
-                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300">
+                  <div className="flex items-center gap-1 p-1 bg-yellow-50 rounded border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors">
+                    <BoxesIcon size={12} className="text-yellow-600" />
+                    <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">
                       {supply.quantity}
                     </Badge>
                   </div>
