@@ -255,7 +255,7 @@ const ClinicRecordsTable = React.memo(function ClinicRecordsTable({ className }:
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1 p-1 bg-orange-50 rounded border border-orange-200 cursor-pointer hover:bg-orange-100 transition-colors">
                     <PillAnimated size={12} className="text-orange-600" />
-                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                    <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-300">
                       {medicine.quantity}
                     </Badge>
                   </div>
